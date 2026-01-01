@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description:
     "K1 is an energy-backed stablecoin financing the transition to a Kardashev Type I civilization.",
   icons: {
-    icon: "/favicon.png", // or /favicon.ico if you used that
+    icon: "/favicon.png", // change to /favicon.ico if you used that
   },
 };
 
