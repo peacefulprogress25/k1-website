@@ -12,20 +12,19 @@ export default function Home() {
           className="absolute inset-0 w-full h-full object-cover"
         />
 
-        {/* DARK OVERLAY FOR READABILITY */}
-        <div className="absolute inset-0 bg-black/40" />
+        {/* DARK OVERLAY */}
+        <div className="absolute inset-0 bg-black/40"></div>
 
         {/* LEFT-ALIGNED CONTENT */}
         <div className="relative z-10 h-full flex items-center">
           <div className="max-w-2xl px-8 md:px-16 text-left">
 
-            <h1 className="text-4xl md:text-6xl font-medium tracking-tight mb-6">
-              K1
-            </h1>
+            <div className="text-3xl md:text-5xl font-normal tracking-tight mb-6 whitespace-normal md:whitespace-nowrap">
+              Stablecoin backed by energy
+            </div>
 
             <p className="text-lg md:text-2xl text-gray-200 mb-10">
-              An energy-backed stablecoin financing the transition to a
-              Kardashev Type I civilization.
+              Building a Kardashev Type 1 civilization
             </p>
 
             {/* CTA BUTTONS */}
@@ -40,3 +39,20 @@ export default function Home() {
               </a>
 
               <a
+                href="https://solarpunkdao.gitbook.io/k1/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-7 py-3 border border-white/40 rounded-md font-medium hover:bg-white hover:text-black transition"
+              >
+                Explore Docs
+              </a>
+            </div>
+
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+  );
+}
