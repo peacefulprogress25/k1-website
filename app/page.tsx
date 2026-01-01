@@ -5,7 +5,7 @@ export default function Home() {
         
         {/* HERO IMAGE */}
         <img
-          src=""
+          src="https://ibb.co/VpTS90tq"
           alt="Energy future"
           className="mx-auto mb-8 rounded-lg opacity-90"
         />
