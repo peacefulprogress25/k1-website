@@ -1,45 +1,42 @@
 export default function Home() {
   return (
-    <main className="min-h-screen bg-black text-white flex items-center justify-center">
-      <section className="max-w-6xl px-6 text-center">
+    <main className="min-h-screen bg-black text-white">
 
-        {/* HERO IMAGE */}
+      {/* HERO SECTION */}
+      <section className="relative w-full h-screen">
+
+        {/* FULL-WIDTH HERO IMAGE */}
         <img
-          src="https://ibb.co/Pzxj1QQx"
-          alt="Future energy infrastructure"
-          className="mx-auto mb-12 rounded-xl opacity-90"
+          src="https://i.ibb.co/n8rmQCCr/Chat-GPT-Image-Jan-1-2026-04-23-21-PM-1.jpg"
+          alt="K1 energy-backed future"
+          className="absolute inset-0 w-full h-full object-cover"
         />
 
-        {/* TAGLINE 1 */}
-        <h1 className="text-4xl md:text-6xl font-medium tracking-tight mb-6">
-        Stablecoin backed by energy
-        </h1>
+        {/* DARK OVERLAY FOR READABILITY */}
+        <div className="absolute inset-0 bg-black/40" />
 
-        {/* TAGLINE 2 */}
-        <p className="text-lg md:text-2xl text-gray-300 max-w-3xl mx-auto mb-10">
-          Building Kardashev Type 1 civilization.
-        </p>
+        {/* LEFT-ALIGNED CONTENT */}
+        <div className="relative z-10 h-full flex items-center">
+          <div className="max-w-2xl px-8 md:px-16 text-left">
 
-        {/* CTA BUTTONS */}
-        <div className="flex justify-center gap-6">
-          <a
-            href="https://t.me/+MWUrdlbcUbE4MzA1"
-            target="_blank"
-            className="px-7 py-3 bg-white text-black rounded-md font-medium hover:opacity-90 transition"
-          >
-            Join Community
-          </a>
+            <h1 className="text-4xl md:text-6xl font-medium tracking-tight mb-6">
+              K1
+            </h1>
 
-          <a
-            href="https://solarpunkdao.gitbook.io/k1/"
-            target="_blank"
-            className="px-7 py-3 border border-white/30 rounded-md font-medium hover:bg-white hover:text-black transition"
-          >
-            Explore Docs
-          </a>
-        </div>
+            <p className="text-lg md:text-2xl text-gray-200 mb-10">
+              An energy-backed stablecoin financing the transition to a
+              Kardashev Type I civilization.
+            </p>
 
-      </section>
-    </main>
-  );
-}
+            {/* CTA BUTTONS */}
+            <div className="flex gap-6">
+              <a
+                href="https://t.me/+MWUrdlbcUbE4MzA1"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-7 py-3 bg-white text-black rounded-md font-medium hover:opacity-90 transition"
+              >
+                Join Community
+              </a>
+
+              <a
