@@ -1,9 +1,21 @@
+import Link from "next/link";
+
 export default function Home() {
   return (
     <main className="min-h-screen bg-black text-white">
 
       {/* HERO SECTION */}
       <section className="relative w-full h-screen">
+
+        {/* TOP RIGHT ACTION */}
+        <div className="absolute top-6 right-6 z-20">
+          <Link
+            href="/mint"
+            className="inline-flex items-center rounded-full border border-white/60 bg-black/25 px-6 py-2 text-sm md:text-base font-medium tracking-wide text-white backdrop-blur-sm transition hover:bg-white hover:text-black"
+          >
+            Mint
+          </Link>
+        </div>
 
         {/* BACKGROUND IMAGE */}
         <img

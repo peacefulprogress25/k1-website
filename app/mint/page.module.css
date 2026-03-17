@@ -1,0 +1,302 @@
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap");
+
+.page {
+  --bg-color: #f9f7f2;
+  --card-bg: #ffffff;
+  --text-primary: #121212;
+  --accent: #ff8c00;
+  --border-ink: #121212;
+
+  min-height: 100vh;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.01em;
+  padding: 60px;
+  font-family: "JetBrains Mono", monospace;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-bottom: 60px;
+  border-bottom: 1px solid var(--border-ink);
+  margin-bottom: 60px;
+}
+
+.brandLogo {
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--text-primary);
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.navLinks {
+  display: flex;
+  gap: 24px;
+}
+
+.navLinks a {
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.navLinks a:hover {
+  text-decoration: underline;
+}
+
+.labelSm {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.heroGrid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 40px;
+  margin-bottom: 40px;
+}
+
+.card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-ink);
+  padding: 32px;
+  position: relative;
+}
+
+.priceHeader {
+  display: flex;
+  justify-content: space-between;
+}
+
+.priceHero {
+  font-size: 48px;
+  font-weight: 300;
+  margin-top: 8px;
+}
+
+.rangeLabel {
+  opacity: 0.5;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-transform: uppercase;
+}
+
+.priceChartContainer {
+  height: 240px;
+  width: 100%;
+  margin-top: 40px;
+  border-top: 1px dashed #ddd;
+}
+
+.sparklinePath {
+  stroke: var(--accent);
+  stroke-width: 2;
+  fill: none;
+}
+
+.walletMini {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 32px;
+}
+
+.liveDot {
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+.txTabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.txTab {
+  flex: 1;
+  padding: 10px;
+  background: transparent;
+  border: 1px solid var(--border-ink);
+  color: var(--text-primary);
+  font-size: 13px;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.active {
+  background: var(--text-primary);
+  color: var(--bg-color);
+}
+
+.inputRow {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border-ink);
+  padding: 12px 16px;
+  margin-bottom: 24px;
+}
+
+.inputRow input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  outline: none;
+  color: var(--text-primary);
+}
+
+.tokenBadge {
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.txSubmit {
+  width: 100%;
+  padding: 16px;
+  background: transparent;
+  border: 1px solid var(--border-ink);
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 14px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.txSubmit:hover {
+  background: var(--text-primary);
+  color: var(--bg-color);
+}
+
+.statsBar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.statItem {
+  border: 1px solid var(--border-ink);
+  padding: 24px;
+  background: var(--card-bg);
+}
+
+.numStat {
+  font-size: 24px;
+  font-weight: 400;
+}
+
+.treasuryCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.reserveText {
+  margin-top: 16px;
+  font-size: 13px;
+  font-weight: 300;
+}
+
+.legend {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 40px;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  background: var(--text-primary);
+}
+
+.outline {
+  background: transparent;
+  border: 1px solid var(--text-primary);
+}
+
+.subInfo {
+  font-size: 11px;
+  margin-top: 4px;
+  opacity: 0.6;
+}
+
+.balanceSection {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #eee;
+}
+
+@media (max-width: 1100px) {
+  .heroGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .statsBar {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .treasuryCard {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 32px;
+  }
+}
+
+@media (max-width: 700px) {
+  .page {
+    padding: 24px;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+    padding-bottom: 32px;
+    margin-bottom: 32px;
+  }
+
+  .statsBar {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    padding: 20px;
+  }
+
+  .priceHero {
+    font-size: 40px;
+  }
+
+  .legend {
+    grid-template-columns: 1fr;
+  }
+}
