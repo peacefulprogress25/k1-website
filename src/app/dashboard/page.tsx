@@ -7,6 +7,7 @@ import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { VersionedTransaction } from "@solana/web3.js";
 import {
   buildDepositTx,
+  buildWithdrawTx,
   buildRequestWithdrawTx,
   fetchUserVaultActions,
   fetchUserPendingWithdrawal,
@@ -410,6 +411,45 @@ export default function DashboardPage() {
     }
   }, [connection, publicKey, selectedVault, sendTransaction, withdrawAmount]);
 
+  const handleClaim = useCallback(async () => {
+    if (!publicKey || !selectedVault || !parsedPending?.canClaim) return;
+    setTxStatus("building");
+    setError(null);
+    try {
+      const { success, transaction } = await buildWithdrawTx(
+        selectedVault,
+        publicKey.toBase58()
+      );
+      if (!success || !transaction) {
+        setError("API did not return a claim transaction.");
+        setTxStatus("error");
+        return;
+      }
+      setTxStatus("sending");
+      const tx = VersionedTransaction.deserialize(bs58.decode(transaction));
+      const sig = await sendTransaction(tx, connection);
+      setLastTxSig(sig);
+      try {
+        await connection.confirmTransaction(sig);
+      } catch {
+        setTxStatus("done");
+        return;
+      }
+      setTxStatus("done");
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Claim transaction failed.";
+      const sigFromError = msg.match(/[1-9A-HJ-NP-Za-km-z]{87,88}/)?.[0];
+      if (sigFromError) {
+        setLastTxSig(sigFromError);
+        setTxStatus("done");
+      } else {
+        setError(msg);
+        setTxStatus("error");
+        setLastTxSig(null);
+      }
+    }
+  }, [connection, parsedPending?.canClaim, publicKey, selectedVault, sendTransaction]);
+
   const actionDisabled = txStatus === "building" || txStatus === "sending";
   const inputAmount = tradeMode === "deposit" ? depositAmount : withdrawAmount;
   const outputEstimate = tradeMode === "deposit" ? simulateDeposit : simulateWithdraw;
@@ -586,28 +626,41 @@ export default function DashboardPage() {
                     ? "SENDING_TRANSACTION"
                     : "EXECUTE_TRANSACTION"}
                 </button>
+
+                <button
+                  onClick={handleClaim}
+                  disabled={!connected || actionDisabled || !parsedPending?.canClaim}
+                  className="dashboard-ui h-11 w-full border border-[#d9d9d9] bg-white text-[11px] font-medium uppercase tracking-[0.14em] text-[#0f1720] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  CLAIM
+                </button>
               </div>
 
               <div className="mt-4 space-y-2 text-sm">
                 <div>
-                  <p className="dashboard-label dashboard-muted">Current_Balance</p>
+                  <p className="dashboard-label dashboard-muted">K1_Balance</p>
                   <p className="mt-1">
                     {parsedBalance?.success ? `${parsedBalance.formatted} K1` : "--"}
                   </p>
                 </div>
-                {parsedPending?.success && parsedPending.amountRaw > 0 ? (
-                  <div>
-                    <p className="dashboard-label dashboard-muted">Pending_Withdraw</p>
-                    <p className="mt-1">
-                      {parsedPending.amountFormatted} K1
-                    </p>
-                    <p className="dashboard-label dashboard-muted mt-1 text-[11px] tracking-[0.08em]">
-                      {parsedPending.canClaim
-                        ? "AVAILABLE_NOW"
-                        : `UNLOCKS_${formatWithdrawableDate(parsedPending.withdrawableFromTs)}`}
-                    </p>
-                  </div>
-                ) : null}
+                <div>
+                  <p className="dashboard-label dashboard-muted">Withdraw_Pending</p>
+                  <p className="mt-1">
+                    {parsedPending?.success && parsedPending.amountRaw > 0
+                      ? `${parsedPending.amountFormatted} K1`
+                      : "--"}
+                  </p>
+                </div>
+                <div>
+                  <p className="dashboard-label dashboard-muted">Claim</p>
+                  <p className="mt-1">
+                    {parsedPending?.success && parsedPending.amountRaw > 0
+                      ? parsedPending.canClaim
+                        ? "Available now"
+                        : formatWithdrawableDate(parsedPending.withdrawableFromTs)
+                      : "--"}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
