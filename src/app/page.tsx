@@ -22,7 +22,7 @@ function Navigation() {
 
         <div className="font-landing-body flex items-center gap-4 sm:gap-6">
           <Link
-            href="/dashboard"
+            href="/mint"
             className="rounded-full border border-[#d3661c] px-4 py-2 text-[1.125rem] font-medium text-[#d3661c] transition-colors hover:bg-[#d3661c] hover:text-white"
           >
             Mint
