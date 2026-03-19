@@ -647,7 +647,7 @@ export default function DashboardPage() {
                   <p className="dashboard-label dashboard-muted">Withdraw_Pending</p>
                   <p className="mt-1">
                     {parsedPending?.success && parsedPending.amountRaw > 0
-                      ? `${parsedPending.amountFormatted} K1`
+                      ? `${parsedPending.amountFormatted} USDC`
                       : "--"}
                   </p>
                 </div>
