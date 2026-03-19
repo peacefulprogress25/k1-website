@@ -44,6 +44,15 @@ const STRATEGY_ALLOCATION = [
   { label: "USDv", value: 10, tone: "bg-[#d7d7d7]" },
 ];
 
+const ASSET_DECIMALS = 6;
+const LP_DECIMALS = 9;
+
+function toBaseUnits(amount: string, decimals: number) {
+  const [whole, frac = ""] = amount.trim().split(".");
+  const padded = `${whole || "0"}${frac.slice(0, decimals).padEnd(decimals, "0")}`;
+  return padded.replace(/^0+/, "") || "0";
+}
+
 type VaultInfoState =
   | { status: "ok"; data: unknown }
   | { status: "not_found" }
@@ -300,7 +309,7 @@ export default function DashboardPage() {
       setSimulateDeposit(null);
       return;
     }
-    const lamportAmount = (Number(depositAmount) * 1e6).toFixed(0);
+    const lamportAmount = toBaseUnits(depositAmount, ASSET_DECIMALS);
     const timer = setTimeout(() => {
       fetchVaultSimulateDeposit(selectedVault, { lamportAmount })
         .then((r) => setSimulateDeposit(r.status === "ok" ? r.data : null))
@@ -314,7 +323,7 @@ export default function DashboardPage() {
       setSimulateWithdraw(null);
       return;
     }
-    const lamportAmount = (Number(withdrawAmount) * 1e6).toFixed(0);
+    const lamportAmount = toBaseUnits(withdrawAmount, LP_DECIMALS);
     const timer = setTimeout(() => {
       fetchVaultSimulateWithdraw(selectedVault, { lamportAmount })
         .then((r) => setSimulateWithdraw(r.status === "ok" ? r.data : null))
@@ -371,7 +380,7 @@ export default function DashboardPage() {
     setTxStatus("building");
     setError(null);
     try {
-      const lamportAmount = (Number(withdrawAmount) * 1e6).toFixed(0);
+      const lamportAmount = toBaseUnits(withdrawAmount, LP_DECIMALS);
       const { success, transaction } = await buildRequestWithdrawTx(
         selectedVault,
         lamportAmount,
