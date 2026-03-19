@@ -3,26 +3,174 @@
 @tailwind utilities;
 
 :root {
-  --vault-bg: #0f172a;
-  --vault-card: #1e293b;
-  --vault-border: #334155;
-  --vault-accent: #0ea5e9;
+  --vault-bg: #f7f5f1;
+  --vault-card: #ffffff;
+  --vault-border: #d9d9d9;
+  --vault-accent: #e26815;
+  --background: #ffffff;
+  --foreground: #1a1a1a;
+  --card: #f9f9f9;
+  --card-foreground: #1a1a1a;
+  --primary: #d3661c;
+  --primary-foreground: #ffffff;
+  --secondary: #f5f5f5;
+  --secondary-foreground: #1a1a1a;
+  --muted: #666666;
+  --muted-foreground: #888888;
+  --accent: #d3661c;
+  --accent-foreground: #ffffff;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --border: #e5e5e5;
+  --input: #f5f5f5;
+  --ring: #d3661c;
+  --radius: 0rem;
+}
+
+html {
+  background: var(--vault-bg);
 }
 
 body {
   background: var(--vault-bg);
-  color: #e2e8f0;
+  color: #0f1720;
   min-height: 100vh;
+  font-family: "IBM Plex Mono", "JetBrains Mono", "Courier New", monospace;
+}
+
+.font-landing-body {
+  font-family: var(--font-space-grotesk), "Arial", sans-serif;
+}
+
+.font-landing-heading {
+  font-family: var(--font-inter), "Arial", sans-serif;
+}
+
+.landing-surface {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.dashboard-surface {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.dashboard-label {
+  font-family: var(--font-space-grotesk), "Arial", sans-serif;
+  font-size: 0.68rem;
+  line-height: 1.1;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.dashboard-eyebrow {
+  color: var(--primary);
+}
+
+.dashboard-muted {
+  color: var(--muted-foreground);
+}
+
+.dashboard-heading {
+  font-family: var(--font-space-grotesk), "Arial", sans-serif;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.dashboard-value {
+  font-family: var(--font-space-grotesk), "Arial", sans-serif;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+}
+
+.dashboard-body {
+  font-family: var(--font-space-grotesk), "Arial", sans-serif;
+}
+
+.dashboard-ui {
+  font-family: var(--font-inter), "Arial", sans-serif;
 }
 
 .card {
-  @apply rounded-xl border border-vault-border bg-vault-card p-6 shadow-lg;
+  @apply border border-vault-border bg-vault-card p-6;
 }
 
 .btn-primary {
-  @apply rounded-lg bg-vault-primary px-4 py-2 font-medium text-white transition hover:opacity-90;
+  @apply bg-vault-primary px-4 py-2 font-medium text-white transition hover:opacity-90;
 }
 
 .btn-outline {
-  @apply rounded-lg border border-vault-border bg-transparent px-4 py-2 font-medium transition hover:bg-vault-card;
+  @apply border border-vault-border bg-transparent px-4 py-2 font-medium transition hover:bg-vault-card;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #c5c5c5 #f3f1ec;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #f3f1ec;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #c5c5c5;
+}
+
+@layer base {
+  .landing-page * {
+    border-color: var(--border);
+    outline-color: color-mix(in srgb, var(--ring) 50%, transparent);
+  }
+}
+
+@layer utilities {
+  .text-hero {
+    font-family: var(--font-space-grotesk), "Arial", sans-serif;
+    font-size: clamp(1.5625rem, 6vw, 2.5rem);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    font-weight: 500;
+  }
+
+  .text-mega {
+    font-family: var(--font-space-grotesk), "Arial", sans-serif;
+    font-size: clamp(1.3rem, 4vw, 2.4rem);
+    line-height: 1.25;
+    letter-spacing: -0.005em;
+    font-weight: 500;
+  }
+
+  .text-display {
+    font-family: var(--font-inter), "Arial", sans-serif;
+    font-size: clamp(1.25rem, 3vw, 1.875rem);
+    line-height: 1.3;
+    letter-spacing: 0;
+    font-weight: 500;
+  }
+
+  .text-section-heading {
+    font-family: var(--font-space-grotesk), "Arial", sans-serif;
+    font-size: 1.5rem;
+    line-height: 1.25;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+
+  .numbered-item {
+    font-family: var(--font-inter), "Arial", sans-serif;
+    font-size: 1rem;
+    line-height: 1.6;
+    font-weight: 500;
+  }
+
+  .image-placeholder {
+    @apply flex h-full w-full items-center justify-center bg-gray-100 text-gray-400;
+  }
 }

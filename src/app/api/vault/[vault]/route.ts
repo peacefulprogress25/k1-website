@@ -9,9 +9,9 @@ const RPC_URL =
 
 export async function GET(
   _req: Request,
-  context: { params: { vault: string } }
+  context: { params: Promise<{ vault: string }> }
 ) {
-  const { vault } = context.params;
+  const { vault } = await context.params;
 
   let vaultPubkey: PublicKey;
   try {
@@ -47,4 +47,3 @@ export async function GET(
     );
   }
 }
-
