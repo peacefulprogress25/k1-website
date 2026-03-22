@@ -85,6 +85,42 @@ function formatApiValue(v: unknown): string {
   return String(val);
 }
 
+function formatTokenAmount(raw: string | number, decimals: number, fractionDigits = 6): string {
+  const value = typeof raw === "number" ? raw : Number(raw);
+  if (!Number.isFinite(value)) return "--";
+  return (value / 10 ** decimals).toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: fractionDigits,
+  });
+}
+
+function formatOutputEstimate(
+  estimate: unknown,
+  tradeMode: "deposit" | "withdraw"
+): string {
+  if (!estimate || typeof estimate !== "object") return "--";
+
+  const root = estimate as Record<string, unknown>;
+  const inner =
+    root.data && typeof root.data === "object"
+      ? (root.data as Record<string, unknown>)
+      : root;
+
+  if (tradeMode === "deposit") {
+    const lpAmount = inner.lpAmount ?? inner.lamportAmount ?? inner.amount;
+    if (lpAmount != null) {
+      return formatTokenAmount(lpAmount as string | number, LP_DECIMALS, 9);
+    }
+  } else {
+    const assetAmount = inner.amount ?? inner.lamportAmount ?? inner.assetAmount;
+    if (assetAmount != null) {
+      return formatTokenAmount(assetAmount as string | number, ASSET_DECIMALS, 6);
+    }
+  }
+
+  return formatApiValue(estimate);
+}
+
 function buildChartPath(values: number[], width: number, height: number) {
   if (values.length === 0) return "";
   const min = Math.min(...values);
@@ -462,6 +498,7 @@ export default function DashboardPage() {
   const actionDisabled = txStatus === "building" || txStatus === "sending";
   const inputAmount = tradeMode === "deposit" ? depositAmount : withdrawAmount;
   const outputEstimate = tradeMode === "deposit" ? simulateDeposit : simulateWithdraw;
+  const outputEstimateDisplay = formatOutputEstimate(outputEstimate, tradeMode);
 
   return (
     <main className="dashboard-surface dashboard-body min-h-screen px-3 py-4 text-[#0f1720] md:px-6">
@@ -616,7 +653,7 @@ export default function DashboardPage() {
                   <label className="dashboard-label dashboard-muted">Output_Estimated</label>
                   <div className="mt-2 grid grid-cols-[1fr_auto] gap-2">
                     <div className="dashboard-body flex h-11 items-center border border-[#d9d9d9] bg-[#faf8f3] px-3 font-medium">
-                      {formatApiValue(outputEstimate)}
+                      {outputEstimateDisplay}
                     </div>
                     <div className="dashboard-body flex h-11 min-w-[48px] items-center justify-center border border-[#d9d9d9] bg-[#faf8f3] px-3 text-[11px] uppercase tracking-[0.12em]">
                       {tradeMode === "deposit" ? "K1" : assetLabel}
