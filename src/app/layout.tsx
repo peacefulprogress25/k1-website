@@ -15,8 +15,8 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "Vault Manager | Ranger Multi-Strategy Yield",
-  description: "Multi-strategy automated yield vault on Ranger Finance (Solana).",
+  title: "K1 - Money backed by energy",
+  description: "K1 - Money backed by energy",
 };
 
 export default function RootLayout({
