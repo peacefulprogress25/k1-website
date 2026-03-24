@@ -121,6 +121,12 @@ function formatOutputEstimate(
   return formatApiValue(estimate);
 }
 
+function parseDisplayNumber(value: string | null | undefined): number | null {
+  if (!value) return null;
+  const numeric = Number(String(value).replace(/[^0-9.-]/g, ""));
+  return Number.isFinite(numeric) ? numeric : null;
+}
+
 function buildChartPath(values: number[], width: number, height: number) {
   if (values.length === 0) return "";
   const min = Math.min(...values);
@@ -229,6 +235,13 @@ export default function DashboardPage() {
       : latestChartValue != null
       ? latestChartValue.toFixed(4)
       : "--";
+  const sharePriceNumber = useMemo(() => {
+    const parsed = parseDisplayNumber(parsedSharePrice?.sharePriceFormatted);
+    if (parsed != null && parsed > 0) return parsed;
+    return latestChartValue != null && Number.isFinite(latestChartValue) && latestChartValue > 0
+      ? latestChartValue
+      : null;
+  }, [latestChartValue, parsedSharePrice?.sharePriceFormatted]);
   const latestPoint = useMemo(
     () => getChartPoint(latestChartValue ?? 1.0204, chartValues.length - 1, chartValues, 1000, 180),
     [chartValues, latestChartValue]
@@ -498,7 +511,21 @@ export default function DashboardPage() {
   const actionDisabled = txStatus === "building" || txStatus === "sending";
   const inputAmount = tradeMode === "deposit" ? depositAmount : withdrawAmount;
   const outputEstimate = tradeMode === "deposit" ? simulateDeposit : simulateWithdraw;
-  const outputEstimateDisplay = formatOutputEstimate(outputEstimate, tradeMode);
+  const apiOutputEstimateDisplay = formatOutputEstimate(outputEstimate, tradeMode);
+  const fallbackOutputEstimateDisplay = useMemo(() => {
+    const amount = Number(inputAmount);
+    if (!Number.isFinite(amount) || amount <= 0 || !sharePriceNumber || sharePriceNumber <= 0) {
+      return "--";
+    }
+    const fallbackValue =
+      tradeMode === "deposit" ? amount / sharePriceNumber : amount * sharePriceNumber;
+    return fallbackValue.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 6,
+    });
+  }, [inputAmount, sharePriceNumber, tradeMode]);
+  const outputEstimateDisplay =
+    apiOutputEstimateDisplay !== "--" ? apiOutputEstimateDisplay : fallbackOutputEstimateDisplay;
 
   return (
     <main className="dashboard-surface dashboard-body min-h-screen px-3 py-4 text-[#0f1720] md:px-6">
