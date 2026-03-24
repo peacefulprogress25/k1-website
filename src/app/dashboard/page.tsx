@@ -299,7 +299,7 @@ export default function DashboardPage() {
     return [];
   }, [sharePriceSeries]);
 
-  const explorerUrl = (sig: string) => `https://explorer.solana.com/tx/${sig}`;
+  const explorerUrl = (sig: string) => `https://www.orbmarkets.io/tx/${sig}`;
 
   useEffect(() => {
     fetchVaultsTvl()
