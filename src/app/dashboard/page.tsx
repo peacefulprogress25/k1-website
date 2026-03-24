@@ -153,6 +153,13 @@ function formatFallbackEstimate(
   });
 }
 
+function waitForConfirmation(connection: { confirmTransaction: (signature: string) => Promise<unknown> }, signature: string) {
+  return Promise.race([
+    connection.confirmTransaction(signature),
+    new Promise((resolve) => setTimeout(resolve, 15000)),
+  ]);
+}
+
 function buildChartPath(values: number[], width: number, height: number) {
   if (values.length === 0) return "";
   const min = Math.min(...values);
@@ -233,6 +240,7 @@ export default function DashboardPage() {
   const [lastAction, setLastAction] = useState<"deposit" | "withdraw_request" | "claim" | null>(null);
   const [lastSuccessAmount, setLastSuccessAmount] = useState<string | null>(null);
   const [lastSuccessUnit, setLastSuccessUnit] = useState<string | null>(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -434,19 +442,12 @@ export default function DashboardPage() {
       const tx = VersionedTransaction.deserialize(bs58.decode(transaction));
       const sig = await sendTransaction(tx, connection);
       setLastTxSig(sig);
-      try {
-        await connection.confirmTransaction(sig);
-      } catch {
-        setTxStatus("done");
-        setLastSuccessAmount(depositSuccessAmount !== "--" ? depositSuccessAmount : depositAmount);
-        setLastSuccessUnit("K1");
-        setDepositAmount("");
-        return;
-      }
       setTxStatus("done");
       setLastSuccessAmount(depositSuccessAmount !== "--" ? depositSuccessAmount : depositAmount);
       setLastSuccessUnit("K1");
+      setShowSuccessModal(true);
       setDepositAmount("");
+      waitForConfirmation(connection, sig).catch(() => undefined);
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Transaction failed.";
       const sigFromError = msg.match(/[1-9A-HJ-NP-Za-km-z]{87,88}/)?.[0];
@@ -455,6 +456,7 @@ export default function DashboardPage() {
         setTxStatus("done");
         setLastSuccessAmount(depositSuccessAmount !== "--" ? depositSuccessAmount : depositAmount);
         setLastSuccessUnit("K1");
+        setShowSuccessModal(true);
         setDepositAmount("");
       } else {
         setError(msg);
@@ -486,19 +488,12 @@ export default function DashboardPage() {
       const tx = VersionedTransaction.deserialize(bs58.decode(transaction));
       const sig = await sendTransaction(tx, connection);
       setLastTxSig(sig);
-      try {
-        await connection.confirmTransaction(sig);
-      } catch {
-        setTxStatus("done");
-        setLastSuccessAmount(withdrawAmount);
-        setLastSuccessUnit("K1");
-        setWithdrawAmount("");
-        return;
-      }
       setTxStatus("done");
       setLastSuccessAmount(withdrawAmount);
       setLastSuccessUnit("K1");
+      setShowSuccessModal(true);
       setWithdrawAmount("");
+      waitForConfirmation(connection, sig).catch(() => undefined);
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Transaction failed.";
       const sigFromError = msg.match(/[1-9A-HJ-NP-Za-km-z]{87,88}/)?.[0];
@@ -507,6 +502,7 @@ export default function DashboardPage() {
         setTxStatus("done");
         setLastSuccessAmount(withdrawAmount);
         setLastSuccessUnit("K1");
+        setShowSuccessModal(true);
         setWithdrawAmount("");
       } else {
         setError(msg);
@@ -535,17 +531,11 @@ export default function DashboardPage() {
       const tx = VersionedTransaction.deserialize(bs58.decode(transaction));
       const sig = await sendTransaction(tx, connection);
       setLastTxSig(sig);
-      try {
-        await connection.confirmTransaction(sig);
-      } catch {
-        setTxStatus("done");
-        setLastSuccessAmount(parsedPending?.amountFormatted ?? null);
-        setLastSuccessUnit(assetLabel);
-        return;
-      }
       setTxStatus("done");
       setLastSuccessAmount(parsedPending?.amountFormatted ?? null);
       setLastSuccessUnit(assetLabel);
+      setShowSuccessModal(true);
+      waitForConfirmation(connection, sig).catch(() => undefined);
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Claim transaction failed.";
       const sigFromError = msg.match(/[1-9A-HJ-NP-Za-km-z]{87,88}/)?.[0];
@@ -554,6 +544,7 @@ export default function DashboardPage() {
         setTxStatus("done");
         setLastSuccessAmount(parsedPending?.amountFormatted ?? null);
         setLastSuccessUnit(assetLabel);
+        setShowSuccessModal(true);
       } else {
         setError(msg);
         setTxStatus("error");
@@ -579,9 +570,49 @@ export default function DashboardPage() {
       : lastAction === "claim"
       ? `${lastSuccessAmount ?? "--"} ${lastSuccessUnit ?? assetLabel} claimed successfully.`
       : "Transaction submitted successfully.";
+  const successModalTitle =
+    lastAction === "deposit"
+      ? `${lastSuccessAmount ?? "--"} K1 Minted`
+      : lastAction === "withdraw_request"
+      ? `${lastSuccessAmount ?? "--"} USDC Received`
+      : lastAction === "claim"
+      ? `${lastSuccessAmount ?? "--"} ${lastSuccessUnit ?? assetLabel} Claimed`
+      : "Transaction Successful";
+  const successModalSubtitle =
+    lastAction === "deposit"
+      ? "Congrats on creating money backed by energy."
+      : lastAction === "withdraw_request" || lastAction === "claim"
+      ? "Appreciate your contribution in bringing more energy to this world."
+      : "";
 
   return (
     <main className="dashboard-surface dashboard-body min-h-screen px-3 py-4 text-[#0f1720] md:px-6">
+      {showSuccessModal ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f1720]/40 px-4">
+          <div className="w-full max-w-md border border-[#d9d9d9] bg-[#fcfbf8] p-6 shadow-[0_18px_60px_rgba(15,23,32,0.18)]">
+            <p className="dashboard-label dashboard-eyebrow">Transaction_Success</p>
+            <p className="mt-4 text-[2rem] leading-tight text-[#0f1720]">{successModalTitle}</p>
+            <p className="mt-3 text-sm text-[#5f5a52]">{successModalSubtitle}</p>
+            {lastTxSig ? (
+              <a
+                href={explorerUrl(lastTxSig)}
+                target="_blank"
+                rel="noreferrer"
+                className="dashboard-body mt-5 inline-block text-[11px] font-medium uppercase tracking-[0.12em] text-[#d76a1d] underline"
+              >
+                View_On_Solana_Explorer
+              </a>
+            ) : null}
+            <button
+              type="button"
+              onClick={() => setShowSuccessModal(false)}
+              className="dashboard-ui mt-6 h-11 w-full border border-[#1f1f1f] bg-[#1f1f1f] text-[11px] font-medium uppercase tracking-[0.14em] text-white"
+            >
+              CLOSE
+            </button>
+          </div>
+        </div>
+      ) : null}
       <div className="mx-auto max-w-[1880px]">
         <header className="flex flex-wrap items-center justify-between gap-4 border border-[#d9d9d9] bg-[#faf8f3] px-4 py-3">
           <div className="flex items-center gap-4">
