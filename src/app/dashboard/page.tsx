@@ -127,6 +127,32 @@ function parseDisplayNumber(value: string | null | undefined): number | null {
   return Number.isFinite(numeric) ? numeric : null;
 }
 
+function formatFallbackEstimate(
+  amount: string,
+  sharePriceNumber: number | null,
+  tradeMode: "deposit" | "withdraw"
+): string {
+  const numericAmount = Number(amount);
+  if (
+    !Number.isFinite(numericAmount) ||
+    numericAmount <= 0 ||
+    !sharePriceNumber ||
+    sharePriceNumber <= 0
+  ) {
+    return "--";
+  }
+
+  const fallbackValue =
+    tradeMode === "deposit"
+      ? numericAmount / sharePriceNumber
+      : numericAmount * sharePriceNumber;
+
+  return fallbackValue.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 6,
+  });
+}
+
 function buildChartPath(values: number[], width: number, height: number) {
   if (values.length === 0) return "";
   const min = Math.min(...values);
@@ -386,6 +412,10 @@ export default function DashboardPage() {
 
   const handleDeposit = useCallback(async () => {
     if (!publicKey || !selectedVault || !depositAmount) return;
+    const depositSuccessAmount =
+      formatOutputEstimate(simulateDeposit, "deposit") !== "--"
+        ? formatOutputEstimate(simulateDeposit, "deposit")
+        : formatFallbackEstimate(depositAmount, sharePriceNumber, "deposit");
     setLastAction("deposit");
     setTxStatus("building");
     setError(null);
@@ -408,13 +438,13 @@ export default function DashboardPage() {
         await connection.confirmTransaction(sig);
       } catch {
         setTxStatus("done");
-        setLastSuccessAmount(outputEstimateDisplay !== "--" ? outputEstimateDisplay : depositAmount);
+        setLastSuccessAmount(depositSuccessAmount !== "--" ? depositSuccessAmount : depositAmount);
         setLastSuccessUnit("K1");
         setDepositAmount("");
         return;
       }
       setTxStatus("done");
-      setLastSuccessAmount(outputEstimateDisplay !== "--" ? outputEstimateDisplay : depositAmount);
+      setLastSuccessAmount(depositSuccessAmount !== "--" ? depositSuccessAmount : depositAmount);
       setLastSuccessUnit("K1");
       setDepositAmount("");
     } catch (e) {
@@ -423,7 +453,7 @@ export default function DashboardPage() {
       if (sigFromError) {
         setLastTxSig(sigFromError);
         setTxStatus("done");
-        setLastSuccessAmount(outputEstimateDisplay !== "--" ? outputEstimateDisplay : depositAmount);
+        setLastSuccessAmount(depositSuccessAmount !== "--" ? depositSuccessAmount : depositAmount);
         setLastSuccessUnit("K1");
         setDepositAmount("");
       } else {
@@ -432,7 +462,7 @@ export default function DashboardPage() {
         setLastTxSig(null);
       }
     }
-  }, [connection, depositAmount, outputEstimateDisplay, publicKey, selectedVault, sendTransaction]);
+  }, [connection, depositAmount, publicKey, selectedVault, sendTransaction, sharePriceNumber, simulateDeposit]);
 
   const handleRequestWithdraw = useCallback(async () => {
     if (!publicKey || !selectedVault || !withdrawAmount) return;
@@ -537,16 +567,7 @@ export default function DashboardPage() {
   const outputEstimate = tradeMode === "deposit" ? simulateDeposit : simulateWithdraw;
   const apiOutputEstimateDisplay = formatOutputEstimate(outputEstimate, tradeMode);
   const fallbackOutputEstimateDisplay = useMemo(() => {
-    const amount = Number(inputAmount);
-    if (!Number.isFinite(amount) || amount <= 0 || !sharePriceNumber || sharePriceNumber <= 0) {
-      return "--";
-    }
-    const fallbackValue =
-      tradeMode === "deposit" ? amount / sharePriceNumber : amount * sharePriceNumber;
-    return fallbackValue.toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 6,
-    });
+    return formatFallbackEstimate(inputAmount, sharePriceNumber, tradeMode);
   }, [inputAmount, sharePriceNumber, tradeMode]);
   const outputEstimateDisplay =
     apiOutputEstimateDisplay !== "--" ? apiOutputEstimateDisplay : fallbackOutputEstimateDisplay;
