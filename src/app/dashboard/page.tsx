@@ -204,6 +204,9 @@ export default function DashboardPage() {
   const [txStatus, setTxStatus] = useState<"idle" | "building" | "sending" | "done" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
   const [lastTxSig, setLastTxSig] = useState<string | null>(null);
+  const [lastAction, setLastAction] = useState<"deposit" | "withdraw_request" | "claim" | null>(null);
+  const [lastSuccessAmount, setLastSuccessAmount] = useState<string | null>(null);
+  const [lastSuccessUnit, setLastSuccessUnit] = useState<string | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -383,6 +386,7 @@ export default function DashboardPage() {
 
   const handleDeposit = useCallback(async () => {
     if (!publicKey || !selectedVault || !depositAmount) return;
+    setLastAction("deposit");
     setTxStatus("building");
     setError(null);
     try {
@@ -404,10 +408,14 @@ export default function DashboardPage() {
         await connection.confirmTransaction(sig);
       } catch {
         setTxStatus("done");
+        setLastSuccessAmount(outputEstimateDisplay !== "--" ? outputEstimateDisplay : depositAmount);
+        setLastSuccessUnit("K1");
         setDepositAmount("");
         return;
       }
       setTxStatus("done");
+      setLastSuccessAmount(outputEstimateDisplay !== "--" ? outputEstimateDisplay : depositAmount);
+      setLastSuccessUnit("K1");
       setDepositAmount("");
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Transaction failed.";
@@ -415,6 +423,8 @@ export default function DashboardPage() {
       if (sigFromError) {
         setLastTxSig(sigFromError);
         setTxStatus("done");
+        setLastSuccessAmount(outputEstimateDisplay !== "--" ? outputEstimateDisplay : depositAmount);
+        setLastSuccessUnit("K1");
         setDepositAmount("");
       } else {
         setError(msg);
@@ -422,10 +432,11 @@ export default function DashboardPage() {
         setLastTxSig(null);
       }
     }
-  }, [connection, depositAmount, publicKey, selectedVault, sendTransaction]);
+  }, [connection, depositAmount, outputEstimateDisplay, publicKey, selectedVault, sendTransaction]);
 
   const handleRequestWithdraw = useCallback(async () => {
     if (!publicKey || !selectedVault || !withdrawAmount) return;
+    setLastAction("withdraw_request");
     setTxStatus("building");
     setError(null);
     try {
@@ -449,10 +460,14 @@ export default function DashboardPage() {
         await connection.confirmTransaction(sig);
       } catch {
         setTxStatus("done");
+        setLastSuccessAmount(withdrawAmount);
+        setLastSuccessUnit("K1");
         setWithdrawAmount("");
         return;
       }
       setTxStatus("done");
+      setLastSuccessAmount(withdrawAmount);
+      setLastSuccessUnit("K1");
       setWithdrawAmount("");
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Transaction failed.";
@@ -460,6 +475,8 @@ export default function DashboardPage() {
       if (sigFromError) {
         setLastTxSig(sigFromError);
         setTxStatus("done");
+        setLastSuccessAmount(withdrawAmount);
+        setLastSuccessUnit("K1");
         setWithdrawAmount("");
       } else {
         setError(msg);
@@ -471,6 +488,7 @@ export default function DashboardPage() {
 
   const handleClaim = useCallback(async () => {
     if (!publicKey || !selectedVault || !parsedPending?.canClaim) return;
+    setLastAction("claim");
     setTxStatus("building");
     setError(null);
     try {
@@ -491,22 +509,28 @@ export default function DashboardPage() {
         await connection.confirmTransaction(sig);
       } catch {
         setTxStatus("done");
+        setLastSuccessAmount(parsedPending?.amountFormatted ?? null);
+        setLastSuccessUnit(assetLabel);
         return;
       }
       setTxStatus("done");
+      setLastSuccessAmount(parsedPending?.amountFormatted ?? null);
+      setLastSuccessUnit(assetLabel);
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Claim transaction failed.";
       const sigFromError = msg.match(/[1-9A-HJ-NP-Za-km-z]{87,88}/)?.[0];
       if (sigFromError) {
         setLastTxSig(sigFromError);
         setTxStatus("done");
+        setLastSuccessAmount(parsedPending?.amountFormatted ?? null);
+        setLastSuccessUnit(assetLabel);
       } else {
         setError(msg);
         setTxStatus("error");
         setLastTxSig(null);
       }
     }
-  }, [connection, parsedPending?.canClaim, publicKey, selectedVault, sendTransaction]);
+  }, [assetLabel, connection, parsedPending?.amountFormatted, parsedPending?.canClaim, publicKey, selectedVault, sendTransaction]);
 
   const actionDisabled = txStatus === "building" || txStatus === "sending";
   const inputAmount = tradeMode === "deposit" ? depositAmount : withdrawAmount;
@@ -526,6 +550,14 @@ export default function DashboardPage() {
   }, [inputAmount, sharePriceNumber, tradeMode]);
   const outputEstimateDisplay =
     apiOutputEstimateDisplay !== "--" ? apiOutputEstimateDisplay : fallbackOutputEstimateDisplay;
+  const successMessage =
+    lastAction === "deposit"
+      ? `${lastSuccessAmount ?? "--"} ${lastSuccessUnit ?? "K1"} minted successfully.`
+      : lastAction === "withdraw_request"
+      ? `${lastSuccessAmount ?? "--"} ${lastSuccessUnit ?? "K1"} redeem request submitted successfully.`
+      : lastAction === "claim"
+      ? `${lastSuccessAmount ?? "--"} ${lastSuccessUnit ?? assetLabel} claimed successfully.`
+      : "Transaction submitted successfully.";
 
   return (
     <main className="dashboard-surface dashboard-body min-h-screen px-3 py-4 text-[#0f1720] md:px-6">
@@ -870,7 +902,7 @@ export default function DashboardPage() {
                   <p>{error}</p>
                 ) : (
                   <div>
-                    <p>Transaction submitted successfully.</p>
+                    <p>{successMessage}</p>
                     {lastTxSig ? (
                       <a
                         href={explorerUrl(lastTxSig)}
