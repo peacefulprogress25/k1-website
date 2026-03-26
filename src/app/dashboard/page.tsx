@@ -574,7 +574,7 @@ export default function DashboardPage() {
     lastAction === "deposit"
       ? `${lastSuccessAmount ?? "--"} K1 Minted`
       : lastAction === "withdraw_request"
-      ? `${lastSuccessAmount ?? "--"} USDC Received`
+      ? `${lastSuccessAmount ?? "--"} USDC Redeemed`
       : lastAction === "claim"
       ? `${lastSuccessAmount ?? "--"} ${lastSuccessUnit ?? assetLabel} Claimed`
       : "Transaction Successful";
