@@ -9,6 +9,9 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@coral-xyz/anchor": "^0.32.1",
+    "@solana/web3.js": "^1.98.4",
+    "@voltr/vault-sdk": "^1.0.21",
     "next": "16.1.1",
     "react": "19.2.3",
     "react-dom": "19.2.3"
