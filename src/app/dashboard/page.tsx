@@ -259,8 +259,8 @@ export default function DashboardPage() {
     if (sharePriceSeries.length > 0) {
       return sharePriceSeries.map((point) => point.value);
     }
-    const numeric = Number(String(parsedSharePrice?.sharePriceFormatted ?? "1.0204").replace(/[^0-9.-]/g, ""));
-    return Number.isFinite(numeric) && numeric > 0 ? [numeric] : [1.0204];
+    const numeric = Number(String(parsedSharePrice?.sharePriceFormatted ?? "1.001").replace(/[^0-9.-]/g, ""));
+    return Number.isFinite(numeric) && numeric > 0 ? [numeric] : [1.001];
   }, [parsedSharePrice?.sharePriceFormatted, sharePriceSeries]);
   const chartPath = useMemo(() => buildChartPath(chartValues, 1000, 180), [chartValues]);
   const latestChartValue = chartValues[chartValues.length - 1];
@@ -280,7 +280,7 @@ export default function DashboardPage() {
       : null;
   }, [latestChartValue, parsedSharePrice?.sharePriceFormatted]);
   const latestPoint = useMemo(
-    () => getChartPoint(latestChartValue ?? 1.0204, chartValues.length - 1, chartValues, 1000, 180),
+    () => getChartPoint(latestChartValue ?? 1.001, chartValues.length - 1, chartValues, 1000, 180),
     [chartValues, latestChartValue]
   );
   const chartMin = chartValues.length > 0 ? Math.min(...chartValues) : null;
@@ -690,7 +690,7 @@ export default function DashboardPage() {
                   fontSize="10"
                   fill="#e26815"
                 >
-                  price : ${latestChartValue?.toFixed(4) ?? "1.0204"}
+                  price : ${latestChartValue?.toFixed(4) ?? "1.0010"}
                 </text>
                 {chartTicks.map((tick) => (
                   <g key={`${tick.label}-${tick.x}`}>
