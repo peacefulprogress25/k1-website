@@ -36,12 +36,14 @@ const VAULT_PUBKEYS = (process.env.NEXT_PUBLIC_VAULT_PUBKEYS || "")
   .split(",")
   .map((s) => s.trim())
   .filter(Boolean);
+const K1_TOKEN_MINT =
+  process.env.NEXT_PUBLIC_K1_TOKEN_MINT ||
+  "CRgV3jPxmM8TbxEeVbfDCDsrRaFJkXeCUpK3QTgjWQfB";
 
 const STRATEGY_ALLOCATION = [
-  { label: "sHYUSD", value: 40, tone: "bg-[#e26815]" },
-  { label: "USD*", value: 30, tone: "bg-[#1f1f1f]" },
+  { label: "sHYUSD", value: 50, tone: "bg-[#e26815]" },
+  { label: "ONyc", value: 30, tone: "bg-[#1f1f1f]" },
   { label: "uWatt", value: 20, tone: "bg-[#8f8f8f]" },
-  { label: "USDv", value: 10, tone: "bg-[#d7d7d7]" },
 ];
 
 const ASSET_DECIMALS = 6;
@@ -230,6 +232,7 @@ export default function DashboardPage() {
   const [simulateWithdraw, setSimulateWithdraw] = useState<unknown | null>(null);
   const [globalTvl, setGlobalTvl] = useState<unknown | null>(null);
   const [globalInterestEarned, setGlobalInterestEarned] = useState<unknown | null>(null);
+  const [holderCount, setHolderCount] = useState<number | null>(null);
   const [selectedVault, setSelectedVault] = useState<string>(VAULT_PUBKEYS[0] || "");
   const [depositAmount, setDepositAmount] = useState("");
   const [withdrawAmount, setWithdrawAmount] = useState("");
@@ -308,6 +311,16 @@ export default function DashboardPage() {
     fetchVaultsInterestEarned()
       .then((r) => setGlobalInterestEarned(r.status === "ok" ? r.data : null))
       .catch(() => setGlobalInterestEarned(null));
+  }, []);
+
+  useEffect(() => {
+    fetch(`/api/token/${K1_TOKEN_MINT}/holders`)
+      .then(async (res) => {
+        if (!res.ok) return null;
+        return (await res.json()) as { holders?: number };
+      })
+      .then((data) => setHolderCount(typeof data?.holders === "number" ? data.holders : null))
+      .catch(() => setHolderCount(null));
   }, []);
 
   useEffect(() => {
@@ -834,7 +847,7 @@ export default function DashboardPage() {
           />
           <TerminalStat
             label="Holders"
-            value="--"
+            value={holderCount != null ? holderCount.toLocaleString() : "--"}
           />
           <TerminalStat
             label="Yield_Distributed"
