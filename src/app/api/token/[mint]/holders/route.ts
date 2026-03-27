@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { PublicKey } from "@solana/web3.js";
+import { Connection, PublicKey } from "@solana/web3.js";
 
 const RPC_URL =
   process.env.RPC_URL ||
@@ -7,6 +7,9 @@ const RPC_URL =
   "https://api.mainnet-beta.solana.com";
 
 const PAGE_LIMIT = 1000;
+const SPL_TOKEN_PROGRAM_ID = new PublicKey(
+  "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+);
 type TokenAccountsResponse = {
   result?: {
     token_accounts?: Array<{
@@ -71,6 +74,46 @@ async function fetchTokenAccountOwners(
   return owners;
 }
 
+function readStandardOwnerFromSlice(data: Buffer): string | null {
+  if (data.length < 40) return null;
+  try {
+    return new PublicKey(data.subarray(0, 32)).toBase58();
+  } catch {
+    return null;
+  }
+}
+
+function readStandardAmountFromSlice(data: Buffer): bigint {
+  if (data.length < 40) return BigInt(0);
+  return data.readBigUInt64LE(32);
+}
+
+async function fetchStandardRpcTokenOwners(
+  rpcUrl: string,
+  mintPubkey: PublicKey
+): Promise<string[]> {
+  const connection = new Connection(rpcUrl, "confirmed");
+  const accounts = await connection.getProgramAccounts(SPL_TOKEN_PROGRAM_ID, {
+    filters: [
+      { dataSize: 165 },
+      { memcmp: { offset: 0, bytes: mintPubkey.toBase58() } },
+    ],
+    dataSlice: {
+      offset: 32,
+      length: 40,
+    },
+  });
+
+  const owners: string[] = [];
+  for (const account of accounts) {
+    const owner = readStandardOwnerFromSlice(account.account.data);
+    const amount = readStandardAmountFromSlice(account.account.data);
+    if (!owner || amount <= BigInt(0)) continue;
+    owners.push(owner);
+  }
+  return owners;
+}
+
 export async function GET(
   _req: Request,
   context: { params: Promise<{ mint: string }> }
@@ -86,7 +129,15 @@ export async function GET(
 
   try {
     const ownerSet = new Set<string>();
-    const owners = await fetchTokenAccountOwners(RPC_URL, mintPubkey);
+    let owners: string[] = [];
+
+    try {
+      owners = await fetchTokenAccountOwners(RPC_URL, mintPubkey);
+    } catch (error) {
+      console.warn("Helius token accounts lookup failed, falling back to standard RPC:", error);
+      owners = await fetchStandardRpcTokenOwners(RPC_URL, mintPubkey);
+    }
+
     owners.forEach((owner) => ownerSet.add(owner));
 
     return NextResponse.json(
