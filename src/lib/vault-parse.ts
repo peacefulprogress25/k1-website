@@ -38,6 +38,8 @@ export interface ParsedVault {
   address: string;
   assetTotalValue: string;
   assetTotalValueRaw: string;
+  currentPrice: number | null;
+  currentPriceFormatted: string;
   assetMint: string;
   assetLabel: string;
   lpMint: string;
@@ -67,6 +69,18 @@ export function parseVaultResponse(data: unknown): ParsedVault | null {
     minimumFractionDigits: 2,
     maximumFractionDigits: 6,
   });
+  const currentPriceValue = d.currentPrice != null ? Number(d.currentPrice) : null;
+  const currentPrice =
+    currentPriceValue != null && Number.isFinite(currentPriceValue) && currentPriceValue > 0
+      ? currentPriceValue
+      : null;
+  const currentPriceFormatted =
+    currentPrice != null
+      ? currentPrice.toLocaleString(undefined, {
+          minimumFractionDigits: 4,
+          maximumFractionDigits: 6,
+        })
+      : "—";
 
   const assetMint = (d.assetMint as string) ?? "";
   const assetLabel = KNOWN_MINTS[assetMint] ?? `${assetMint.slice(0, 4)}…${assetMint.slice(-4)}`;
@@ -108,6 +122,8 @@ export function parseVaultResponse(data: unknown): ParsedVault | null {
     address: (d.address as string) ?? "",
     assetTotalValue: totalValueFormatted,
     assetTotalValueRaw,
+    currentPrice,
+    currentPriceFormatted,
     assetMint,
     assetLabel,
     lpMint,

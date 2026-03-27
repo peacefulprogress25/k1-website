@@ -262,26 +262,37 @@ export default function DashboardPage() {
     if (sharePriceSeries.length > 0) {
       return sharePriceSeries.map((point) => point.value);
     }
-    const numeric = Number(String(parsedSharePrice?.sharePriceFormatted ?? "1.001").replace(/[^0-9.-]/g, ""));
+    const numeric = Number(
+      String(parsedVault?.currentPriceFormatted ?? parsedSharePrice?.sharePriceFormatted ?? "1.001").replace(
+        /[^0-9.-]/g,
+        ""
+      )
+    );
     return Number.isFinite(numeric) && numeric > 0 ? [numeric] : [1.001];
-  }, [parsedSharePrice?.sharePriceFormatted, sharePriceSeries]);
+  }, [parsedSharePrice?.sharePriceFormatted, parsedVault?.currentPriceFormatted, sharePriceSeries]);
   const chartPath = useMemo(() => buildChartPath(chartValues, 1000, 180), [chartValues]);
   const latestChartValue = chartValues[chartValues.length - 1];
   const latestChartLabel =
     sharePriceSeries[sharePriceSeries.length - 1]?.label ?? "Latest";
   const marketPrice =
-    parsedSharePrice?.sharePriceFormatted && parsedSharePrice.sharePriceFormatted !== "--"
+    parsedVault?.currentPriceFormatted && parsedVault.currentPriceFormatted !== "—"
+      ? parsedVault.currentPriceFormatted
+      : parsedSharePrice?.sharePriceFormatted && parsedSharePrice.sharePriceFormatted !== "--"
       ? parsedSharePrice.sharePriceFormatted
       : latestChartValue != null
       ? latestChartValue.toFixed(4)
       : "--";
   const sharePriceNumber = useMemo(() => {
+    const currentVaultPrice = parsedVault?.currentPrice;
+    if (currentVaultPrice != null && Number.isFinite(currentVaultPrice) && currentVaultPrice > 0) {
+      return currentVaultPrice;
+    }
     const parsed = parseDisplayNumber(parsedSharePrice?.sharePriceFormatted);
     if (parsed != null && parsed > 0) return parsed;
     return latestChartValue != null && Number.isFinite(latestChartValue) && latestChartValue > 0
       ? latestChartValue
       : null;
-  }, [latestChartValue, parsedSharePrice?.sharePriceFormatted]);
+  }, [latestChartValue, parsedSharePrice?.sharePriceFormatted, parsedVault?.currentPrice]);
   const latestPoint = useMemo(
     () => getChartPoint(latestChartValue ?? 1.001, chartValues.length - 1, chartValues, 1000, 180),
     [chartValues, latestChartValue]

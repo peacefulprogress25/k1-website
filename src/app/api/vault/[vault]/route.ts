@@ -6,6 +6,8 @@ const RPC_URL =
   process.env.RPC_URL ||
   process.env.NEXT_PUBLIC_RPC_URL ||
   "https://api.mainnet-beta.solana.com";
+const ASSET_DECIMALS = 6;
+const LP_DECIMALS = 9;
 
 export async function GET(
   _req: Request,
@@ -27,11 +29,15 @@ export async function GET(
     const connection = new Connection(RPC_URL);
     const client = new VoltrClient(connection);
     const vaultData = await client.fetchVaultAccount(vaultPubkey);
+    const currentAssetPerLp = await client.getCurrentAssetPerLpForVault(vaultPubkey);
+    const currentPrice = currentAssetPerLp * 10 ** (LP_DECIMALS - ASSET_DECIMALS);
 
     return NextResponse.json(
       {
         address: vault,
         assetTotalValue: vaultData.asset.totalValue.toString(),
+        currentAssetPerLp,
+        currentPrice,
         assetMint: vaultData.asset.mint.toBase58(),
         admin: vaultData.admin.toBase58(),
         manager: vaultData.manager.toBase58(),
