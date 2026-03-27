@@ -8,11 +8,13 @@ const RPC_URL =
 
 const PAGE_LIMIT = 1000;
 type TokenAccountsResponse = {
-  token_accounts?: Array<{
-    owner?: string;
-    amount?: number | string;
-  }>;
-  cursor?: string | null;
+  result?: {
+    token_accounts?: Array<{
+      owner?: string;
+      amount?: number | string;
+    }>;
+    cursor?: string | null;
+  };
   error?: {
     message?: string;
   };
@@ -56,14 +58,14 @@ async function fetchTokenAccountOwners(
       throw new Error(payload.error.message || "RPC returned an error");
     }
 
-    for (const account of payload.token_accounts ?? []) {
+    for (const account of payload.result?.token_accounts ?? []) {
       if (!account.owner) continue;
       const amount = account.amount;
       if (amount == null || BigInt(amount) <= BigInt(0)) continue;
       owners.push(account.owner);
     }
 
-    cursor = payload.cursor;
+    cursor = payload.result?.cursor;
   } while (cursor);
 
   return owners;
