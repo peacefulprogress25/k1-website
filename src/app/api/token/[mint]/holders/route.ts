@@ -1,45 +1,72 @@
 import { NextResponse } from "next/server";
-import { Connection, PublicKey } from "@solana/web3.js";
+import { PublicKey } from "@solana/web3.js";
 
 const RPC_URL =
   process.env.RPC_URL ||
   process.env.NEXT_PUBLIC_RPC_URL ||
   "https://api.mainnet-beta.solana.com";
 
-const TOKEN_PROGRAM_IDS = [
-  new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"),
-  new PublicKey("TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"),
-];
-
-function readHolderOwner(account: unknown): string | null {
-  if (!account || typeof account !== "object") return null;
-  const parsedAccount = account as {
-    account?: {
-      data?: {
-        program?: string;
-        parsed?: {
-          type?: string;
-          info?: {
-            owner?: string;
-            tokenAmount?: {
-              amount?: string;
-            };
-          };
-        };
-      };
-    };
+const PAGE_LIMIT = 1000;
+type TokenAccountsResponse = {
+  token_accounts?: Array<{
+    owner?: string;
+    amount?: number | string;
+  }>;
+  cursor?: string | null;
+  error?: {
+    message?: string;
   };
+};
 
-  const parsed = parsedAccount.account?.data?.parsed;
-  if (parsedAccount.account?.data?.program !== "spl-token") return null;
-  if (parsed?.type !== "account") return null;
+async function fetchTokenAccountOwners(
+  rpcUrl: string,
+  mintPubkey: PublicKey
+): Promise<string[]> {
+  const owners: string[] = [];
+  let cursor: string | null | undefined;
 
-  const amount = parsed.info?.tokenAmount?.amount;
-  const owner = parsed.info?.owner;
-  if (!owner || !amount) return null;
-  if (BigInt(amount) <= BigInt(0)) return null;
+  do {
+    const body = {
+      jsonrpc: "2.0",
+      id: "holders",
+      method: "getTokenAccounts",
+      params: {
+        mint: mintPubkey.toBase58(),
+        limit: PAGE_LIMIT,
+        ...(cursor ? { cursor } : {}),
+        options: {
+          showZeroBalance: false,
+        },
+      },
+    };
 
-  return owner;
+    const response = await fetch(rpcUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      throw new Error(`RPC request failed with status ${response.status}`);
+    }
+
+    const payload = (await response.json()) as TokenAccountsResponse;
+    if (payload.error) {
+      throw new Error(payload.error.message || "RPC returned an error");
+    }
+
+    for (const account of payload.token_accounts ?? []) {
+      if (!account.owner) continue;
+      const amount = account.amount;
+      if (amount == null || BigInt(amount) <= BigInt(0)) continue;
+      owners.push(account.owner);
+    }
+
+    cursor = payload.cursor;
+  } while (cursor);
+
+  return owners;
 }
 
 export async function GET(
@@ -56,19 +83,9 @@ export async function GET(
   }
 
   try {
-    const connection = new Connection(RPC_URL, "confirmed");
     const ownerSet = new Set<string>();
-
-    for (const programId of TOKEN_PROGRAM_IDS) {
-      const accounts = await connection.getParsedProgramAccounts(programId, {
-        filters: [{ memcmp: { offset: 0, bytes: mintPubkey.toBase58() } }],
-      });
-
-      for (const account of accounts) {
-        const owner = readHolderOwner(account);
-        if (owner) ownerSet.add(owner);
-      }
-    }
+    const owners = await fetchTokenAccountOwners(RPC_URL, mintPubkey);
+    owners.forEach((owner) => ownerSet.add(owner));
 
     return NextResponse.json(
       {
