@@ -10,6 +10,8 @@ import {
 } from "recharts";
 import MintPage from "@/components/MintPage";
 import { K1Logo } from "@/components/K1Logo";
+import { fetchVaultsTvl } from "@/lib/ranger-api";
+import { parseTvlResponse } from "@/lib/vault-parse";
 
 const SECTIONS = [
   {
@@ -19,11 +21,6 @@ const SECTIONS = [
     subheading: "Energy that creates yield",
     description: "Stablecoin that mobilizes capital into energy infra. Every K1 minted creates energy that generates continuous yield and runs our economy",
     graphic: "sphere",
-    stats: [
-      { label: "TVL", value: "$124.5M" },
-      { label: "APY", value: "12.4%" },
-      { label: "HOLDERS", value: "8,432" },
-    ],
   },
   {
     id: 1,
@@ -158,6 +155,36 @@ export default function App() {
 
   const [activeSection, setActiveSection] = useState(0);
   const [showMintPage, setShowMintPage] = useState(false);
+  const [globalTvl, setGlobalTvl] = useState<unknown | null>(null);
+  const [holderCount, setHolderCount] = useState<number | null>(null);
+
+  const parsedTvl = parseTvlResponse(globalTvl);
+  const heroStats = [
+    { label: "TVL", value: parsedTvl?.formatted && parsedTvl.formatted !== "—" ? `$${parsedTvl.formatted}` : "--" },
+    { label: "APY", value: "--" },
+    { label: "HOLDERS", value: holderCount != null ? holderCount.toLocaleString() : "--" },
+  ];
+
+  useEffect(() => {
+    fetchVaultsTvl()
+      .then((response) => setGlobalTvl(response.status === "ok" ? response.data : null))
+      .catch(() => setGlobalTvl(null));
+  }, []);
+
+  useEffect(() => {
+    const mint =
+      process.env.NEXT_PUBLIC_K1_TOKEN_MINT ||
+      "CRgV3jPxmM8TbxEeVbfDCDsrRaFJkXeCUpK3QTgjWQfB";
+
+    fetch(`/api/token/${mint}/holders`)
+      .then(async (response) =>
+        response.ok ? ((await response.json()) as { holders?: number }) : null
+      )
+      .then((data) =>
+        setHolderCount(typeof data?.holders === "number" ? data.holders : null)
+      )
+      .catch(() => setHolderCount(null));
+  }, []);
 
   useEffect(() => {
     const unsubscribe = scrollYProgress.on("change", (latest) => {
@@ -189,13 +216,14 @@ export default function App() {
       <Sidebar activeIndex={activeSection} />
 
       {/* Content Layer */}
-      <div className="fixed inset-0 flex items-start px-8 pt-10 md:px-14 lg:px-20 xl:px-24 pointer-events-none">
-        <div className="mx-auto grid h-full w-full max-w-7xl grid-cols-1 items-start gap-10 lg:grid-cols-[minmax(360px,440px)_1fr] xl:gap-16">
+      <div className="fixed inset-0 flex items-center px-8 pt-6 md:px-14 lg:px-20 xl:px-24 pointer-events-none">
+        <div className="mx-auto grid h-full w-full max-w-7xl grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-14 xl:gap-16">
           
           {/* Left Column: Text Content */}
-          <div className="z-10 mt-6 max-w-[440px] lg:mt-4">
+          <div className={`z-10 flex h-full w-full ${activeSection === 5 ? "items-start pt-28 md:pt-32" : "items-center"}`}>
+            <div className="w-full max-w-[460px]">
             <div className={`flex flex-col justify-end pb-2 transition-all duration-500 ${
-              activeSection === 5 ? "h-[50px] md:h-[80px]" : "h-[90px] md:h-[160px]"
+              activeSection === 5 ? "h-[50px] md:h-[80px]" : "h-[120px] md:h-[170px]"
             }`}>
               <h1 className={`font-serif text-white mb-0 leading-[1.1] tracking-tight transition-all duration-500 ${
                 activeSection === 5 ? "text-2xl md:text-[38px]" : "text-3xl md:text-[50px]"
@@ -247,9 +275,9 @@ export default function App() {
                         {SECTIONS[activeSection].description}
                       </p>
                       
-                      {SECTIONS[activeSection].stats && (
+                      {activeSection === 0 && (
                         <div className="mt-8 flex gap-8">
-                          {SECTIONS[activeSection].stats.map((stat, i) => (
+                          {heroStats.map((stat, i) => (
                             <div key={i} className="flex flex-col">
                               <span className="text-[9px] font-mono text-gray-600 tracking-widest uppercase">
                                 {stat.label}
@@ -266,11 +294,12 @@ export default function App() {
                 </motion.div>
               </AnimatePresence>
             </div>
+            </div>
           </div>
 
           {/* Right Column: Dynamic Graphics */}
-          <div className={`relative flex h-full transition-all duration-500 ${
-            activeSection === 5 ? "items-start" : "items-center justify-center"
+          <div className={`relative flex h-full w-full transition-all duration-500 ${
+            activeSection === 5 ? "items-start pt-28 md:pt-32" : "items-center justify-center"
           }`}>
             <AnimatePresence mode="wait">
               <motion.div
@@ -279,8 +308,8 @@ export default function App() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 1.1 }}
                 transition={{ duration: 0.7, ease: "circOut" }}
-                className={`w-full h-full flex ${
-                  activeSection === 5 ? "items-start" : "items-center justify-center"
+                className={`flex h-full w-full ${
+                  activeSection === 5 ? "items-start justify-center" : "items-center justify-center"
                 }`}
               >
                 <GraphicRenderer type={SECTIONS[activeSection].graphic} />
