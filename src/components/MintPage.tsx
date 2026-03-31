@@ -41,7 +41,7 @@ const K1_TOKEN_MINT =
 const ASSET_DECIMALS = 6;
 const LP_DECIMALS = 9;
 const RESERVE_ALLOCATION = [
-  { label: "sHYUS", value: 50, tone: "bg-brand-orange" },
+  { label: "sHYUSD", value: 50, tone: "bg-brand-orange" },
   { label: "ONyc", value: 30, tone: "bg-gray-600" },
   { label: "uWatt", value: 20, tone: "bg-gray-800" },
 ];
@@ -320,9 +320,8 @@ export default function MintPage({ onClose }: MintPageProps) {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-          <div className={`${metricClass} p-8`}><div className="absolute left-0 top-0 h-2 w-2 border-l border-t border-gray-700" /><h3 className="mb-6 text-[11px] font-extrabold uppercase tracking-widest text-gray-600">Vault Configuration</h3><MetaGrid rows={[["Vault Name", parsedVault?.name ?? "Loading..."], ["Asset", assetLabel], ["Admin Fee", parsedVault?.fees.adminPerformance ?? "--"], ["Manager Fee", parsedVault?.fees.managerPerformance ?? "--"], ["Redemption Fee", parsedVault?.fees.redemption ?? "--"], ["Issuance Fee", parsedVault?.fees.issuance ?? "--"]]} /></div>
-          <div className={`${metricClass} p-8`}><div className="absolute left-0 top-0 h-2 w-2 border-l border-t border-gray-700" /><h3 className="mb-6 text-[11px] font-extrabold uppercase tracking-widest text-gray-600">Vault Addresses</h3><MetaGrid rows={[["Vault", vault || "--"], ["Admin", parsedVault?.admin ?? "--"], ["Manager", parsedVault?.manager ?? "--"], ["Wallet", walletAddress ? shortAddress(walletAddress) : "--"], ["Pending Claim", parsedPending?.success && parsedPending.amountRaw > 0 ? `${parsedPending.amountFormatted} ${assetLabel}` : "--"]]} mono /></div>
+        <div className="grid grid-cols-1 gap-8">
+          <div className={`${metricClass} p-8`}><div className="absolute left-0 top-0 h-2 w-2 border-l border-t border-gray-700" /><h3 className="mb-6 text-[11px] font-extrabold uppercase tracking-widest text-gray-600">Vault Addresses</h3><MetaGrid rows={[["Vault", vault || "--"], ["Admin", parsedVault?.admin ?? "--"], ["Manager", parsedVault?.manager ?? "--"], ["Wallet", walletAddress ? shortAddress(walletAddress) : "--"], ["Treasury 1", "--"], ["Treasury 2", "--"], ["Pending Claim", parsedPending?.success && parsedPending.amountRaw > 0 ? `${parsedPending.amountFormatted} ${assetLabel}` : "--"]]} mono /></div>
         </div>
       </div>
     </motion.div>
