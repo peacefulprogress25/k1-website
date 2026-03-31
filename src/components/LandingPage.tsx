@@ -11,7 +11,12 @@ import {
 import MintPage from "@/components/MintPage";
 import { K1Logo } from "@/components/K1Logo";
 import { fetchVaultsTvl } from "@/lib/ranger-api";
-import { parseTvlResponse } from "@/lib/vault-parse";
+import { parseTvlResponse, parseVaultResponse } from "@/lib/vault-parse";
+
+const VAULT_PUBKEYS = (process.env.NEXT_PUBLIC_VAULT_PUBKEYS || "")
+  .split(",")
+  .map((value) => value.trim())
+  .filter(Boolean);
 
 const SECTIONS = [
   {
@@ -157,8 +162,10 @@ export default function App() {
   const [showMintPage, setShowMintPage] = useState(false);
   const [globalTvl, setGlobalTvl] = useState<unknown | null>(null);
   const [holderCount, setHolderCount] = useState<number | null>(null);
+  const [vaultInfo, setVaultInfo] = useState<unknown | null>(null);
 
   const parsedTvl = parseTvlResponse(globalTvl);
+  const parsedVault = parseVaultResponse(vaultInfo);
   const heroStats = [
     { label: "TVL", value: parsedTvl?.formatted && parsedTvl.formatted !== "—" ? `$${parsedTvl.formatted}` : "--" },
     { label: "APY", value: "--" },
@@ -169,6 +176,16 @@ export default function App() {
     fetchVaultsTvl()
       .then((response) => setGlobalTvl(response.status === "ok" ? response.data : null))
       .catch(() => setGlobalTvl(null));
+  }, []);
+
+  useEffect(() => {
+    const firstVault = VAULT_PUBKEYS[0];
+    if (!firstVault) return;
+
+    fetch(`/api/vault/${firstVault}`)
+      .then(async (response) => (response.ok ? await response.json() : null))
+      .then(setVaultInfo)
+      .catch(() => setVaultInfo(null));
   }, []);
 
   useEffect(() => {
@@ -220,7 +237,7 @@ export default function App() {
         <div className="mx-auto grid h-full w-full max-w-7xl grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-14 xl:gap-16">
           
           {/* Left Column: Text Content */}
-          <div className={`z-10 flex h-full w-full ${activeSection === 5 ? "items-start pt-28 md:pt-32" : "items-center"}`}>
+          <div className={`z-10 flex h-full w-full ${activeSection === 5 ? "items-start pt-16 md:pt-20" : "items-center"}`}>
             <div className="w-full max-w-[460px]">
             <div className={`flex flex-col justify-end pb-2 transition-all duration-500 ${
               activeSection === 5 ? "h-[50px] md:h-[80px]" : "h-[120px] md:h-[170px]"
@@ -277,7 +294,11 @@ export default function App() {
                       
                       {activeSection === 0 && (
                         <div className="mt-8 flex gap-8">
-                          {heroStats.map((stat, i) => (
+                          {(heroStats.map((stat) =>
+                            stat.label === "TVL" && stat.value === "--" && parsedVault?.assetTotalValue
+                              ? { ...stat, value: `$${parsedVault.assetTotalValue}` }
+                              : stat
+                          )).map((stat, i) => (
                             <div key={i} className="flex flex-col">
                               <span className="text-[9px] font-mono text-gray-600 tracking-widest uppercase">
                                 {stat.label}
@@ -299,7 +320,7 @@ export default function App() {
 
           {/* Right Column: Dynamic Graphics */}
           <div className={`relative flex h-full w-full transition-all duration-500 ${
-            activeSection === 5 ? "items-start pt-28 md:pt-32" : "items-center justify-center"
+            activeSection === 5 ? "items-start justify-center pt-16 md:pt-20" : "items-center justify-center"
           }`}>
             <AnimatePresence mode="wait">
               <motion.div
