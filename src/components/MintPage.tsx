@@ -35,7 +35,9 @@ import {
 interface MintPageProps { onClose: () => void }
 
 const VAULT_PUBKEYS = (process.env.NEXT_PUBLIC_VAULT_PUBKEYS || "").split(",").map((v) => v.trim()).filter(Boolean);
-const K1_TOKEN_MINT = process.env.NEXT_PUBLIC_K1_TOKEN_MINT || "";
+const K1_TOKEN_MINT =
+  process.env.NEXT_PUBLIC_K1_TOKEN_MINT ||
+  "CRgV3jPxmM8TbxEeVbfDCDsrRaFJkXeCUpK3QTgjWQfB";
 const ASSET_DECIMALS = 6;
 const LP_DECIMALS = 9;
 
@@ -56,12 +58,6 @@ const chartEstimate = (estimate: unknown, mode: "deposit" | "withdraw") => {
   const decimals = mode === "deposit" ? LP_DECIMALS : ASSET_DECIMALS;
   return raw != null ? (Number(raw) / 10 ** decimals).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 }) : "--";
 };
-const actionHelpText = {
-  MINT: "Mint K1 by depositing the vault asset.",
-  REDEEM: "Step 1 of 2. Request a withdrawal by locking K1 for redemption.",
-  CLAIM: "Step 2 of 2. Claim the withdrawal once the waiting period ends.",
-} as const;
-
 export default function MintPage({ onClose }: MintPageProps) {
   const { connection } = useConnection();
   const { publicKey, connected, sendTransaction } = useWallet();
@@ -77,6 +73,7 @@ export default function MintPage({ onClose }: MintPageProps) {
   const [simulateDeposit, setSimulateDeposit] = useState<unknown | null>(null);
   const [simulateWithdraw, setSimulateWithdraw] = useState<unknown | null>(null);
   const [chartTab, setChartTab] = useState<"PRICE" | "APY">("PRICE");
+  const [timeRange, setTimeRange] = useState("30D");
   const [series, setSeries] = useState<Array<{ time: string; price: number; apy: number }>>([]);
   const [txState, setTxState] = useState<"idle" | "building" | "sending" | "done" | "error">("idle");
   const [txMessage, setTxMessage] = useState<string | null>(null);
@@ -88,6 +85,12 @@ export default function MintPage({ onClose }: MintPageProps) {
   const parsedFee = useMemo(() => parseFeeEarnedResponse(feeEarned), [feeEarned]);
   const assetLabel = parsedVault?.assetLabel ?? "USDC";
   const walletAddress = publicKey?.toBase58() ?? null;
+  const displayTvl =
+    formatMaybe(parsedTvl?.formatted, "$") !== "--"
+      ? formatMaybe(parsedTvl?.formatted, "$")
+      : parsedVault?.assetTotalValue
+      ? `$${parsedVault.assetTotalValue}`
+      : "--";
   const marketPrice = series[series.length - 1]?.price ?? parsedVault?.currentPrice ?? null;
   const annualizedApy = useMemo(() => {
     if (series.length < 2) return null;
@@ -175,22 +178,25 @@ export default function MintPage({ onClose }: MintPageProps) {
   const chartData = series.length > 0 ? series : [{ time: "Live", price: marketPrice ?? 1, apy: annualizedApy ?? 0 }];
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] overflow-y-auto bg-black font-mono text-white">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] overflow-y-auto bg-black font-mono text-white selection:bg-brand-orange selection:text-black">
       <div className="fixed inset-0 pointer-events-none opacity-10" style={{ backgroundImage: "radial-gradient(circle, #333 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
       <div className="relative mx-auto max-w-6xl px-6 pb-12 pt-2 md:px-12 md:pb-24 md:pt-4">
-        <div className="mb-4 flex justify-between gap-4">
+        <div className="mb-4 flex justify-end">
+          <button onClick={onClose} className="p-2 transition-colors hover:text-brand-orange"><X size={24} /></button>
+        </div>
+
+        <div className="mb-6 -ml-2 flex items-center justify-between gap-4 md:-ml-4">
           <div className="flex items-center gap-4">
             <div className="h-12 w-12 md:h-16 md:w-16"><K1Logo className="h-full w-full text-brand-orange" /></div>
-            {VAULT_PUBKEYS.length > 1 ? <select value={vault} onChange={(e) => setVault(e.target.value)} className="border border-gray-800 bg-gray-950/70 px-3 py-2 text-[10px] uppercase tracking-[0.2em] outline-none">{VAULT_PUBKEYS.map((value) => <option key={value} value={value}>{value.slice(0, 6)}...{value.slice(-6)}</option>)}</select> : null}
           </div>
-          <div className="flex items-center gap-4">
-            <div className="[&_.wallet-adapter-button]:h-10 [&_.wallet-adapter-button]:rounded-none [&_.wallet-adapter-button]:border [&_.wallet-adapter-button]:border-brand-orange/50 [&_.wallet-adapter-button]:bg-brand-orange [&_.wallet-adapter-button]:px-4 [&_.wallet-adapter-button]:text-[10px] [&_.wallet-adapter-button]:font-bold [&_.wallet-adapter-button]:tracking-[0.18em] [&_.wallet-adapter-button]:text-black"><WalletMultiButton /></div>
-            <button onClick={onClose} className="p-2 transition-colors hover:text-brand-orange"><X size={24} /></button>
+          <div className="flex items-center gap-3">
+            {VAULT_PUBKEYS.length > 1 ? <select value={vault} onChange={(e) => setVault(e.target.value)} className="border border-gray-800 bg-gray-950/70 px-3 py-2 font-sans text-[10px] font-extrabold uppercase tracking-[0.2em] outline-none">{VAULT_PUBKEYS.map((value) => <option key={value} value={value}>{value.slice(0, 6)}...{value.slice(-6)}</option>)}</select> : null}
+            <div className="[&_.wallet-adapter-button]:h-10 [&_.wallet-adapter-button]:rounded-none [&_.wallet-adapter-button]:border [&_.wallet-adapter-button]:border-brand-orange/50 [&_.wallet-adapter-button]:bg-brand-orange [&_.wallet-adapter-button]:px-4 [&_.wallet-adapter-button]:font-sans [&_.wallet-adapter-button]:text-[10px] [&_.wallet-adapter-button]:font-extrabold [&_.wallet-adapter-button]:tracking-[0.18em] [&_.wallet-adapter-button]:text-black"><WalletMultiButton /></div>
           </div>
         </div>
 
         <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Metric label="Total Value Locked" value={formatMaybe(parsedTvl?.formatted, "$")} />
+          <Metric label="Total Value Locked" value={displayTvl} />
           <Metric label="Annualized APY" value={annualizedApy != null ? `${annualizedApy.toFixed(2)}%` : "--"} accent />
           <Metric label="K1 Balance" value={parsedBalance?.success ? parsedBalance.formatted : "--"} />
           <Metric label="Holders" value={holders != null ? holders.toLocaleString() : "--"} accent />
@@ -212,13 +218,23 @@ export default function MintPage({ onClose }: MintPageProps) {
             <Corners />
             <div className="mb-8 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
               <div>
-                <h2 className="mb-1 text-xl font-serif">Vault Overview</h2>
+                <h2 className="mb-1 text-xl font-serif">Market Overview</h2>
                 <div className="mt-4 flex gap-6">
-                  <button onClick={() => setChartTab("PRICE")} className={`flex items-center gap-2 transition-colors ${chartTab === "PRICE" ? "text-brand-orange" : "text-gray-600 hover:text-white"}`}><TrendingUp size={14} /><span className="text-[10px] tracking-[0.18em]">PRICE</span></button>
-                  <button onClick={() => setChartTab("APY")} className={`flex items-center gap-2 transition-colors ${chartTab === "APY" ? "text-brand-orange" : "text-gray-600 hover:text-white"}`}><Activity size={14} /><span className="text-[10px] tracking-[0.18em]">YIELD</span></button>
+                  <button onClick={() => setChartTab("PRICE")} className={`flex items-center gap-2 transition-colors ${chartTab === "PRICE" ? "text-brand-orange" : "text-gray-600 hover:text-white"}`}><TrendingUp size={14} /><span className="font-sans text-[10px] font-extrabold tracking-[0.18em]">PRICE</span></button>
+                  <button onClick={() => setChartTab("APY")} className={`flex items-center gap-2 transition-colors ${chartTab === "APY" ? "text-brand-orange" : "text-gray-600 hover:text-white"}`}><Activity size={14} /><span className="font-sans text-[10px] font-extrabold tracking-[0.18em]">YIELD</span></button>
                 </div>
               </div>
-              <div className="text-right"><div className="text-[10px] uppercase tracking-[0.18em] text-gray-600">Spot Price</div><div className="mt-2 text-2xl font-serif text-brand-orange">{marketPrice != null ? `$${marketPrice.toFixed(4)}` : "--"}</div></div>
+              <div className="flex gap-2 border border-gray-800 bg-gray-900/50 p-1">
+                {["24H", "7D", "30D"].map((range) => (
+                  <button
+                    key={range}
+                    onClick={() => setTimeRange(range)}
+                    className={`px-3 py-1 font-sans text-[8px] font-extrabold uppercase tracking-widest transition-all ${timeRange === range ? "bg-gray-800 text-white" : "text-gray-600 hover:text-gray-400"}`}
+                  >
+                    {range}
+                  </button>
+                ))}
+              </div>
             </div>
             <div className="h-[300px] w-full min-w-0">
               <ResponsiveContainer width="100%" height="100%">
@@ -235,27 +251,25 @@ export default function MintPage({ onClose }: MintPageProps) {
           </div>
 
           <div className="lg:col-span-3">
-            <div className="mb-8 flex gap-8 border-b border-gray-900">{["MINT", "REDEEM", "CLAIM"].map((value) => <button key={value} onClick={() => setTab(value as "MINT" | "REDEEM" | "CLAIM")} className={`relative pb-4 text-[10px] font-extrabold tracking-[0.2em] transition-all ${tab === value ? "text-brand-orange" : "text-gray-600 hover:text-white"}`}>{value}{tab === value ? <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-orange" /> : null}</button>)}</div>
+            <div className="mb-8 flex gap-8 border-b border-gray-900">{["MINT", "REDEEM", "CLAIM"].map((value) => <button key={value} onClick={() => setTab(value as "MINT" | "REDEEM" | "CLAIM")} className={`relative pb-4 font-sans text-[10px] font-extrabold tracking-[0.2em] transition-all ${tab === value ? "text-brand-orange" : "text-gray-600 hover:text-white"}`}>{value}{tab === value ? <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-orange" /> : null}</button>)}</div>
             <div className="relative border border-gray-900 bg-gray-950/10 p-8">
               <Corners />
               <AnimatePresence mode="wait">
                 {tab === "CLAIM" ? (
                   <motion.div key="claim" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-8">
-                    <div className="flex justify-between"><h3 className="text-[11px] font-extrabold uppercase tracking-widest text-gray-500">Complete Withdrawal Claim</h3><span className="text-[11px] tracking-[0.18em] text-brand-orange">{parsedPending?.canClaim ? "READY" : "PENDING"}</span></div>
-                    <div className="border border-brand-orange/10 bg-brand-orange/5 p-8 text-center"><div className="mb-4 text-[10px] font-extrabold uppercase text-gray-600">Claimable</div><div className="flex items-center justify-center gap-3"><span className="text-5xl font-serif">{outputEstimate}</span><span className="text-lg text-brand-orange">{assetLabel}</span></div><div className="mt-4 text-[10px] font-extrabold uppercase text-gray-600">{parsedPending?.success ? (parsedPending.canClaim ? "Available now" : formatWithdrawableDate(parsedPending.withdrawableFromTs)) : "No pending withdrawal"}</div></div>
-                    <p className="text-sm leading-relaxed text-gray-400">{actionHelpText.CLAIM}</p>
-                    <MetaGrid rows={[["Manager Fee", parsedVault?.fees.managerPerformance ?? "--"], ["Fee Earned", parsedFee?.feeEarnedFormatted ?? "--"], ["Withdrawal Wait", parsedVault?.withdrawalWaitingPeriod ?? "--"], ["Vault", vault ? shortAddress(vault) : "--"]]} />
-                    <button onClick={() => publicKey && runTx(() => buildWithdrawTx(vault, publicKey.toBase58()), "Claim")} disabled={!connected || !parsedPending?.canClaim || txState === "building" || txState === "sending"} className="w-full bg-brand-orange py-6 text-xs font-bold uppercase tracking-[0.2em] text-black transition-all hover:bg-white disabled:cursor-not-allowed disabled:opacity-50">{txState === "building" ? "Preparing Claim" : txState === "sending" ? "Sending Claim" : "Complete Claim"}</button>
+                    <div className="flex justify-between"><h3 className="font-sans text-[11px] font-extrabold uppercase tracking-widest text-gray-500">Complete Withdrawal Claim</h3><span className="font-sans text-[11px] font-extrabold tracking-[0.18em] text-brand-orange">{parsedPending?.canClaim ? "READY" : "PENDING"}</span></div>
+                    <div className="mb-8 border border-brand-orange/10 bg-brand-orange/5 p-8 text-center"><div className="mb-4 font-sans text-[10px] font-extrabold uppercase text-gray-600">Claimable</div><div className="flex items-center justify-center gap-3"><span className="text-5xl font-serif">{outputEstimate}</span><span className="text-lg text-brand-orange">{assetLabel}</span></div><div className="mt-4 font-sans text-[10px] font-extrabold uppercase text-gray-600">{parsedPending?.success ? (parsedPending.canClaim ? "Available now" : formatWithdrawableDate(parsedPending.withdrawableFromTs)) : "No pending withdrawal"}</div></div>
+                    <MetaGrid rows={[["Time Pending", parsedPending?.success ? (parsedPending.canClaim ? "Ready now" : formatWithdrawableDate(parsedPending.withdrawableFromTs)) : "--"], ["Vault", vault ? shortAddress(vault) : "--"]]} />
+                    <button onClick={() => publicKey && runTx(() => buildWithdrawTx(vault, publicKey.toBase58()), "Claim")} disabled={!connected || !parsedPending?.canClaim || txState === "building" || txState === "sending"} className="w-full bg-brand-orange py-6 font-sans text-xs font-extrabold uppercase tracking-[0.2em] text-black transition-all hover:bg-white disabled:cursor-not-allowed disabled:opacity-50">{txState === "building" ? "Preparing Claim" : txState === "sending" ? "Sending Claim" : "Complete Claim"}</button>
                   </motion.div>
                 ) : (
                   <motion.div key="trade" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
-                    <div className="mb-8 flex items-center justify-between"><h3 className="text-[11px] font-extrabold uppercase tracking-widest text-gray-500">{tab === "MINT" ? "Mint Amount" : "Redeem Request Amount"}</h3><span className="text-[11px] font-bold tracking-widest text-brand-orange">Price: {marketPrice != null ? `$${marketPrice.toFixed(4)}` : "--"} / K1</span></div>
-                    <p className="mb-6 text-sm leading-relaxed text-gray-400">{actionHelpText[tab]}</p>
+                    <div className="mb-8 flex items-center justify-between"><h3 className="font-sans text-[11px] font-extrabold uppercase tracking-widest text-gray-500">{tab === "MINT" ? "Mint Amount" : "Redeem Request Amount"}</h3><span className="font-sans text-[11px] font-extrabold tracking-widest text-brand-orange">Price: {marketPrice != null ? `$${marketPrice.toFixed(4)}` : "--"} / K1</span></div>
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between border border-gray-900 bg-gray-950 p-6"><div className="flex flex-1 flex-col"><span className="mb-2 text-[10px] font-extrabold uppercase text-gray-600">Pay</span><input type="text" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" className="w-full bg-transparent text-2xl font-serif outline-none" /></div><div className="flex items-center gap-4"><button onClick={() => setAmount(tab === "MINT" ? "100" : parsedBalance?.formatted ?? "")} className="border border-gray-800 px-2 py-1 text-[10px] font-extrabold uppercase transition-colors hover:border-brand-orange">MAX</button><span className="text-lg">{tab === "MINT" ? assetLabel : "K1"}</span></div></div>
-                      <div className="flex items-center justify-between border border-dashed border-gray-900 bg-gray-950/50 p-6"><div className="flex flex-col"><span className="mb-2 text-[10px] font-extrabold uppercase text-gray-600">Receive (Estimated)</span><div className="text-2xl font-serif text-gray-300">{outputEstimate}</div></div><span className="text-lg text-gray-400">{tab === "MINT" ? "K1" : assetLabel}</span></div>
+                      <div className="flex items-center justify-between border border-gray-900 bg-gray-950 p-6"><div className="flex flex-1 flex-col"><span className="mb-2 font-sans text-[10px] font-extrabold uppercase text-gray-600">Pay</span><input type="text" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" className="w-full bg-transparent text-2xl font-serif outline-none" /></div><div className="flex items-center gap-4"><button onClick={() => setAmount(tab === "MINT" ? "100" : parsedBalance?.formatted ?? "")} className="border border-gray-800 px-2 py-1 font-sans text-[10px] font-extrabold uppercase transition-colors hover:border-brand-orange">MAX</button><span className="text-lg">{tab === "MINT" ? assetLabel : "K1"}</span></div></div>
+                      <div className="flex items-center justify-between border border-dashed border-gray-900 bg-gray-950/50 p-6"><div className="flex flex-col"><span className="mb-2 font-sans text-[10px] font-extrabold uppercase text-gray-600">Receive (Estimated)</span><div className="text-2xl font-serif text-gray-300">{outputEstimate}</div></div><span className="text-lg text-gray-400">{tab === "MINT" ? "K1" : assetLabel}</span></div>
                     </div>
-                    <button onClick={() => publicKey && runTx(() => tab === "MINT" ? buildDepositTx(vault, amount, publicKey.toBase58()) : buildRequestWithdrawTx(vault, toBaseUnits(amount, LP_DECIMALS), publicKey.toBase58(), true), tab === "MINT" ? "Mint" : "Redeem request")} disabled={!connected || !vault || !amount || Number(amount) <= 0 || txState === "building" || txState === "sending"} className="mt-12 w-full bg-brand-orange py-6 text-xs font-bold uppercase tracking-[0.2em] text-black transition-all hover:bg-white disabled:cursor-not-allowed disabled:opacity-50">{txState === "building" ? "Preparing Transaction" : txState === "sending" ? "Sending Transaction" : tab === "MINT" ? "Submit Mint" : "Submit Redeem Request"}</button>
+                    <button onClick={() => publicKey && runTx(() => tab === "MINT" ? buildDepositTx(vault, amount, publicKey.toBase58()) : buildRequestWithdrawTx(vault, toBaseUnits(amount, LP_DECIMALS), publicKey.toBase58(), true), tab === "MINT" ? "Mint" : "Redeem request")} disabled={!connected || !vault || !amount || Number(amount) <= 0 || txState === "building" || txState === "sending"} className="mt-12 w-full bg-brand-orange py-6 font-sans text-xs font-extrabold uppercase tracking-[0.2em] text-black transition-all hover:bg-white disabled:cursor-not-allowed disabled:opacity-50">{txState === "building" ? "Preparing Transaction" : txState === "sending" ? "Sending Transaction" : tab === "MINT" ? "Mint" : "Redeem"}</button>
                   </motion.div>
                 )}
               </AnimatePresence>

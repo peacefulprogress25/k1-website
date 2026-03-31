@@ -21,9 +21,9 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ["Inter", "Arial", "sans-serif"],
-        serif: ["Newsreader", "Georgia", "serif"],
-        mono: ["JetBrains Mono", "monospace"],
+        sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
+        serif: ["Newsreader", "PP Editorial New", "Playfair Display", "Georgia", "serif"],
+        mono: ["JetBrains Mono", "Roboto Mono", "monospace"],
       },
     },
   },

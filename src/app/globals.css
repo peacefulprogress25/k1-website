@@ -2,7 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url("https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.cdnfonts.com/css/pp-editorial-new");
 
 :root {
   --vault-bg: #f7f5f1;
@@ -37,20 +38,26 @@ body {
   background: var(--vault-bg);
   color: #0f1720;
   min-height: 100vh;
-  font-family: "IBM Plex Mono", "JetBrains Mono", "Courier New", monospace;
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
 }
 
 .font-landing-body {
-  font-family: var(--font-space-grotesk), "Arial", sans-serif;
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
 }
 
 .font-landing-heading {
-  font-family: var(--font-inter), "Arial", sans-serif;
+  font-family: "Newsreader", "PP Editorial New", "Playfair Display", "Georgia", serif;
 }
 
 .landing-surface {
   background: var(--background);
   color: var(--foreground);
+}
+
+.landing-page {
+  background: #050505;
+  color: #ffffff;
+  overflow-x: hidden;
 }
 
 .dashboard-surface {
@@ -59,7 +66,7 @@ body {
 }
 
 .dashboard-label {
-  font-family: var(--font-space-grotesk), "Arial", sans-serif;
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
   font-size: 0.68rem;
   line-height: 1.1;
   font-weight: 500;
@@ -76,23 +83,23 @@ body {
 }
 
 .dashboard-heading {
-  font-family: var(--font-space-grotesk), "Arial", sans-serif;
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
   font-weight: 500;
   letter-spacing: -0.02em;
 }
 
 .dashboard-value {
-  font-family: var(--font-space-grotesk), "Arial", sans-serif;
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
   font-weight: 500;
   letter-spacing: -0.03em;
 }
 
 .dashboard-body {
-  font-family: var(--font-space-grotesk), "Arial", sans-serif;
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
 }
 
 .dashboard-ui {
-  font-family: var(--font-inter), "Arial", sans-serif;
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
 }
 
 .card {

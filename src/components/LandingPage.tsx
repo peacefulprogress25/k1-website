@@ -171,7 +171,7 @@ export default function App() {
   }, [scrollYProgress]);
 
   return (
-    <div ref={containerRef} className="relative h-[600vh] bg-[#050505]">
+    <div ref={containerRef} className="landing-page relative h-[600vh] bg-[#050505] text-white">
       {/* Fixed Background Grid */}
       <div className="fixed inset-0 grid-bg pointer-events-none opacity-40" />
       <div className="fixed inset-0 vertical-divider pointer-events-none" />
@@ -189,11 +189,11 @@ export default function App() {
       <Sidebar activeIndex={activeSection} />
 
       {/* Content Layer */}
-      <div className="fixed inset-0 flex items-start pt-10 px-12 md:px-24 pointer-events-none">
-        <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-start h-full">
+      <div className="fixed inset-0 flex items-start px-8 pt-10 md:px-14 lg:px-20 xl:px-24 pointer-events-none">
+        <div className="mx-auto grid h-full w-full max-w-7xl grid-cols-1 items-start gap-10 lg:grid-cols-[minmax(360px,440px)_1fr] xl:gap-16">
           
           {/* Left Column: Text Content */}
-          <div className="z-10 mt-4">
+          <div className="z-10 mt-6 max-w-[440px] lg:mt-4">
             <div className={`flex flex-col justify-end pb-2 transition-all duration-500 ${
               activeSection === 5 ? "h-[50px] md:h-[80px]" : "h-[90px] md:h-[160px]"
             }`}>
@@ -231,7 +231,7 @@ export default function App() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5, delay: 0.1 }}
-                      className="text-xl md:text-xl text-gray-400 font-serif mb-6 leading-snug"
+                      className="mb-6 font-serif text-xl leading-snug text-gray-400 md:text-xl"
                     >
                       {SECTIONS[activeSection].subheading}
                     </motion.h2>
@@ -243,7 +243,7 @@ export default function App() {
                     </div>
                   ) : (
                     <>
-                      <p className="text-gray-500 text-sm md:text-sm max-w-[384px] leading-relaxed font-sans">
+                      <p className="max-w-[384px] font-sans text-sm leading-relaxed text-gray-500 md:text-sm">
                         {SECTIONS[activeSection].description}
                       </p>
                       
@@ -269,7 +269,7 @@ export default function App() {
           </div>
 
           {/* Right Column: Dynamic Graphics */}
-          <div className={`relative h-full flex transition-all duration-500 ${
+          <div className={`relative flex h-full transition-all duration-500 ${
             activeSection === 5 ? "items-start" : "items-center justify-center"
           }`}>
             <AnimatePresence mode="wait">
