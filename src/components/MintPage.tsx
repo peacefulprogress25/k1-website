@@ -40,6 +40,11 @@ const K1_TOKEN_MINT =
   "CRgV3jPxmM8TbxEeVbfDCDsrRaFJkXeCUpK3QTgjWQfB";
 const ASSET_DECIMALS = 6;
 const LP_DECIMALS = 9;
+const RESERVE_ALLOCATION = [
+  { label: "sHYUS", value: 50, tone: "bg-brand-orange" },
+  { label: "ONyc", value: 30, tone: "bg-gray-600" },
+  { label: "uWatt", value: 20, tone: "bg-gray-800" },
+];
 
 const toBaseUnits = (amount: string, decimals: number) => {
   const [whole, frac = ""] = amount.trim().split(".");
@@ -57,6 +62,12 @@ const chartEstimate = (estimate: unknown, mode: "deposit" | "withdraw") => {
   const raw = mode === "deposit" ? inner.lpAmount ?? inner.lamportAmount ?? inner.amount : inner.amount ?? inner.lamportAmount ?? inner.assetAmount;
   const decimals = mode === "deposit" ? LP_DECIMALS : ASSET_DECIMALS;
   return raw != null ? (Number(raw) / 10 ** decimals).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 }) : "--";
+};
+const fallbackEstimate = (amount: string, sharePrice: number | null, mode: "deposit" | "withdraw") => {
+  const numericAmount = Number(amount);
+  if (!Number.isFinite(numericAmount) || numericAmount <= 0 || !sharePrice || sharePrice <= 0) return "--";
+  const value = mode === "deposit" ? numericAmount / sharePrice : numericAmount * sharePrice;
+  return value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 });
 };
 export default function MintPage({ onClose }: MintPageProps) {
   const { connection } = useConnection();
@@ -99,11 +110,19 @@ export default function MintPage({ onClose }: MintPageProps) {
     if (!first || !last) return null;
     return (Math.pow(1 + (last / first - 1), 12) - 1) * 100;
   }, [series]);
+  const sharePriceNumber = useMemo(() => {
+    if (marketPrice != null && Number.isFinite(marketPrice) && marketPrice > 0) return marketPrice;
+    const parsed = parsedVault?.currentPrice;
+    if (parsed != null && Number.isFinite(parsed) && parsed > 0) return parsed;
+    return null;
+  }, [marketPrice, parsedVault?.currentPrice]);
   const outputEstimate = useMemo(() => {
     if (tab === "CLAIM") return parsedPending?.success && parsedPending.amountRaw > 0 ? parsedPending.amountFormatted : "--";
     if (!amount || Number(amount) <= 0) return "0.00";
-    return tab === "MINT" ? chartEstimate(simulateDeposit, "deposit") : chartEstimate(simulateWithdraw, "withdraw");
-  }, [amount, parsedPending, simulateDeposit, simulateWithdraw, tab]);
+    const apiEstimate = tab === "MINT" ? chartEstimate(simulateDeposit, "deposit") : chartEstimate(simulateWithdraw, "withdraw");
+    if (apiEstimate !== "--") return apiEstimate;
+    return fallbackEstimate(amount, sharePriceNumber, tab === "MINT" ? "deposit" : "withdraw");
+  }, [amount, parsedPending, sharePriceNumber, simulateDeposit, simulateWithdraw, tab]);
 
   useEffect(() => {
     fetchVaultsTvl().then((r) => setGlobalTvl(r.status === "ok" ? r.data : null)).catch(() => setGlobalTvl(null));
@@ -275,6 +294,29 @@ export default function MintPage({ onClose }: MintPageProps) {
               </AnimatePresence>
               {txMessage ? <div className={`mt-6 border px-4 py-3 text-sm ${txState === "error" ? "border-red-900/60 bg-red-950/20 text-red-200" : "border-brand-orange/30 bg-brand-orange/5 text-gray-200"}`}>{txMessage}</div> : null}
             </div>
+          </div>
+        </div>
+
+        <div className="mb-8 border border-gray-900 bg-gray-950/30 p-8">
+          <div className="mb-4 flex items-end justify-between">
+            <h2 className="font-sans text-[11px] font-extrabold uppercase tracking-[0.2em] text-gray-500">
+              Vault Reserve Allocation
+            </h2>
+            <div className="flex gap-6 font-sans text-[10px] font-extrabold uppercase tracking-widest">
+              {RESERVE_ALLOCATION.map((item) => (
+                <div key={item.label} className="flex items-center gap-2">
+                  <div className={`h-2 w-2 ${item.tone}`} />
+                  <span>
+                    {item.label} ({item.value}%)
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex h-4 w-full overflow-hidden bg-gray-900">
+            {RESERVE_ALLOCATION.map((item) => (
+              <div key={item.label} style={{ width: `${item.value}%` }} className={item.tone} />
+            ))}
           </div>
         </div>
 
