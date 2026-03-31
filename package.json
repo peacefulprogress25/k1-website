@@ -16,9 +16,12 @@
     "@solana/web3.js": "^1.95.0",
     "@voltr/vault-sdk": "^1.0.20",
     "bs58": "^5.0.0",
+    "lucide-react": "^0.546.0",
+    "motion": "^12.38.0",
     "next": "15.x",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "recharts": "^3.8.1"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

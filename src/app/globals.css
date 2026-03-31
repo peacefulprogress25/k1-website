@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url("https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap");
+
 :root {
   --vault-bg: #f7f5f1;
   --vault-card: #ffffff;
@@ -121,6 +123,26 @@ body {
 
 *::-webkit-scrollbar-thumb {
   background: #c5c5c5;
+}
+
+.grid-bg {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+.vertical-divider {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.orange-glow-main {
+  background: radial-gradient(circle at center, rgba(254, 85, 0, 0.25) 0%, transparent 70%);
 }
 
 @layer base {
