@@ -24,7 +24,7 @@ const SECTIONS = [
     prefix: "Money that",
     suffix: "creates energy.",
     subheading: "Energy that creates yield",
-    description: "Stablecoin that mobilizes capital into energy infra. Every K1 minted creates energy that generates continuous yield and runs our economy",
+    description: "K1 is a stablecoin that mobilizes global capital into energy infra. Making energy collateral for a new reserve currency.",
     graphic: "sphere",
   },
   {
@@ -40,7 +40,7 @@ const SECTIONS = [
     prefix: "Money that",
     suffix: "fuels the energy supercycle.",
     subheading: "A $3 Trillion+ annual opportunity",
-    description: "The world is entering an unprecedented energy supercycle driven by AI, EVs, and global modernization. Traditional strucutres cannot meet this massive capital demand. K1 decentralizes the funding of our economy's root asset, allowing anyone to deploy capital and share in the upside of our collective prosperity.",
+    description: "Catalysts like AI, EVs, energy security, and net-zero have triggered an unprecedented energy supercycle. While traditional markets move at a glacial pace, K1 empowers anyone, anywhere in the world, to fuel this supercycle with a single transaction",
     graphic: "geometric",
   },
   {
@@ -55,8 +55,8 @@ const SECTIONS = [
     id: 4,
     prefix: "Money for",
     suffix: "humans, agents & robots.",
-    subheading: "The settlement layer for the abundance economy.",
-    description: "Agents and robots run on energy. To achieve true autonomy, they need a native currency to pay for it. K1 is embodied power. While human allocators use K1 as reliable collateral and a source of superior yield, autonomous systems use it as a frictionless medium of exchange to seamlessly purchase energy & compute",
+    subheading: "Currency for the post scarcity economy.",
+    description: "As intelligence & labor become too cheap to meter, energy will be the only currency that matters. For agents, robots to operate and for humans to earn yield from",
     graphic: "abundance",
   },
   {
@@ -168,7 +168,7 @@ export default function App() {
   const parsedVault = parseVaultResponse(vaultInfo);
   const heroStats = [
     { label: "TVL", value: parsedTvl?.formatted && parsedTvl.formatted !== "—" ? `$${parsedTvl.formatted}` : "--" },
-    { label: "APY", value: "--" },
+    { label: "APY", value: "12.11%" },
     { label: "HOLDERS", value: holderCount != null ? holderCount.toLocaleString() : "--" },
   ];
 
@@ -234,59 +234,76 @@ export default function App() {
 
       {/* Content Layer */}
       <div className="fixed inset-0 flex items-center px-8 pt-6 md:px-14 lg:px-20 xl:px-24 pointer-events-none">
-        <div className="mx-auto grid h-full w-full max-w-7xl grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-14 xl:gap-16">
-          
-          {/* Left Column: Text Content */}
-          <div className={`z-10 flex h-full w-full ${activeSection === 5 ? "items-start pt-16 md:pt-20" : "items-center"}`}>
-            <div className="w-full max-w-[460px]">
-            <div className={`flex flex-col justify-end pb-2 transition-all duration-500 ${
-              activeSection === 5 ? "h-[50px] md:h-[80px]" : "h-[120px] md:h-[170px]"
-            }`}>
-              <h1 className={`font-serif text-white mb-0 leading-[1.1] tracking-tight transition-all duration-500 ${
-                activeSection === 5 ? "text-2xl md:text-[38px]" : "text-3xl md:text-[50px]"
-              }`}>
+        {activeSection === 5 ? (
+          <div className="mx-auto flex h-full w-full max-w-7xl flex-col items-center justify-start pt-16 md:pt-20">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeSection}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="flex w-full flex-1 flex-col items-center"
+              >
+                <h1 className="mb-10 text-center font-serif text-3xl leading-[1.1] tracking-tight text-brand-orange md:text-[50px]">
+                  FAQs
+                </h1>
+                <div className="grid w-full grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-14 xl:gap-16">
+                  <div className="w-full self-start">
+                    <FAQAccordion items={FAQ_DATA.slice(0, 5)} />
+                  </div>
+                  <div className="w-full self-start">
+                    <FAQAccordion items={FAQ_DATA.slice(5)} />
+                  </div>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        ) : (
+          <div className="mx-auto grid h-full w-full max-w-7xl grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-14 xl:gap-16">
+            
+            {/* Left Column: Text Content */}
+            <div className="z-10 flex h-full w-full items-center">
+              <div className="w-full max-w-[460px]">
+              <div className="flex h-[120px] flex-col justify-end pb-2 transition-all duration-500 md:h-[170px]">
+                <h1 className="mb-0 font-serif text-3xl leading-[1.1] tracking-tight text-white transition-all duration-500 md:text-[50px]">
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={activeSection}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.4, ease: "easeOut" }}
+                    >
+                      <span className="text-white block">{SECTIONS[activeSection].prefix}</span>
+                      <span className="italic font-normal text-brand-orange block">
+                        {SECTIONS[activeSection].suffix}
+                      </span>
+                    </motion.div>
+                  </AnimatePresence>
+                </h1>
+              </div>
+              
+              <div className="mt-4">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={activeSection}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.4, ease: "easeOut" }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
                   >
-                    <span className="text-white block">{SECTIONS[activeSection].prefix}</span>
-                    <span className="italic font-normal text-brand-orange block">
-                      {SECTIONS[activeSection].suffix}
-                    </span>
-                  </motion.div>
-                </AnimatePresence>
-              </h1>
-            </div>
-            
-            <div className="mt-4">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeSection}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                >
-                  {SECTIONS[activeSection].subheading && (
-                    <motion.h2
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: 0.1 }}
-                      className="mb-6 font-serif text-xl leading-snug text-gray-400 md:text-xl"
-                    >
-                      {SECTIONS[activeSection].subheading}
-                    </motion.h2>
-                  )}
+                    {SECTIONS[activeSection].subheading && (
+                      <motion.h2
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.1 }}
+                        className="mb-6 font-serif text-xl leading-snug text-gray-400 md:text-xl"
+                      >
+                        {SECTIONS[activeSection].subheading}
+                      </motion.h2>
+                    )}
 
-                  {activeSection === 5 ? (
-                    <div className="mt-4">
-                      <FAQAccordion items={FAQ_DATA.slice(0, 5)} />
-                    </div>
-                  ) : (
                     <>
                       <p className="max-w-[384px] font-sans text-sm leading-relaxed text-gray-500 md:text-sm">
                         {SECTIONS[activeSection].description}
@@ -311,33 +328,29 @@ export default function App() {
                         </div>
                       )}
                     </>
-                  )}
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+              </div>
+            </div>
+
+            {/* Right Column: Dynamic Graphics */}
+            <div className="relative flex h-full w-full items-center justify-center transition-all duration-500">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeSection}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.1 }}
+                  transition={{ duration: 0.7, ease: "circOut" }}
+                  className="flex h-full w-full items-center justify-center"
+                >
+                  <GraphicRenderer type={SECTIONS[activeSection].graphic} />
                 </motion.div>
               </AnimatePresence>
             </div>
-            </div>
           </div>
-
-          {/* Right Column: Dynamic Graphics */}
-          <div className={`relative flex h-full w-full transition-all duration-500 ${
-            activeSection === 5 ? "items-start justify-center pt-16 md:pt-20" : "items-center justify-center"
-          }`}>
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeSection}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 1.1 }}
-                transition={{ duration: 0.7, ease: "circOut" }}
-                className={`flex h-full w-full ${
-                  activeSection === 5 ? "items-start justify-center" : "items-center justify-center"
-                }`}
-              >
-                <GraphicRenderer type={SECTIONS[activeSection].graphic} />
-              </motion.div>
-            </AnimatePresence>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Scrollable Spacers */}
@@ -1095,10 +1108,7 @@ function GraphicRenderer({ type }: { type: string }) {
       return <AbundanceEconomyAnimation />;
     case "faq":
       return (
-        <div className="relative w-full h-full flex flex-col items-start justify-start pt-[88px] md:pt-[118px] pointer-events-auto transition-all duration-500">
-          <FAQAccordion items={FAQ_DATA.slice(5)} />
-          
-          {/* Subtle Background Elements */}
+        <div className="relative w-full h-full pointer-events-auto transition-all duration-500">
           <div className="absolute inset-0 -z-10 opacity-10 pointer-events-none">
             <div className="absolute inset-0 grid grid-cols-8 grid-rows-8 gap-4 p-12">
               {[...Array(64)].map((_, i) => (

@@ -103,13 +103,7 @@ export default function MintPage({ onClose }: MintPageProps) {
       ? `$${parsedVault.assetTotalValue}`
       : "--";
   const marketPrice = series[series.length - 1]?.price ?? parsedVault?.currentPrice ?? null;
-  const annualizedApy = useMemo(() => {
-    if (series.length < 2) return null;
-    const first = series[0].price;
-    const last = series[series.length - 1].price;
-    if (!first || !last) return null;
-    return (Math.pow(1 + (last / first - 1), 12) - 1) * 100;
-  }, [series]);
+  const annualizedApy = 12.11;
   const sharePriceNumber = useMemo(() => {
     if (marketPrice != null && Number.isFinite(marketPrice) && marketPrice > 0) return marketPrice;
     const parsed = parsedVault?.currentPrice;
@@ -216,7 +210,7 @@ export default function MintPage({ onClose }: MintPageProps) {
 
         <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Metric label="Total Value Locked" value={displayTvl} />
-          <Metric label="Annualized APY" value={annualizedApy != null ? `${annualizedApy.toFixed(2)}%` : "--"} accent />
+          <Metric label="Annualized APY" value={`${annualizedApy.toFixed(2)}%`} accent />
           <Metric label="K1 Balance" value={parsedBalance?.success ? parsedBalance.formatted : "--"} />
           <Metric label="Holders" value={holders != null ? holders.toLocaleString() : "--"} accent />
         </div>
@@ -321,7 +315,7 @@ export default function MintPage({ onClose }: MintPageProps) {
         </div>
 
         <div className="grid grid-cols-1 gap-8">
-          <div className={`${metricClass} p-8`}><div className="absolute left-0 top-0 h-2 w-2 border-l border-t border-gray-700" /><h3 className="mb-6 text-[11px] font-extrabold uppercase tracking-widest text-gray-600">Vault Addresses</h3><MetaGrid rows={[["Vault", vault || "--"], ["Admin", parsedVault?.admin ?? "--"], ["Manager", parsedVault?.manager ?? "--"], ["Wallet", walletAddress ? shortAddress(walletAddress) : "--"], ["Treasury 1", "--"], ["Treasury 2", "--"], ["Pending Claim", parsedPending?.success && parsedPending.amountRaw > 0 ? `${parsedPending.amountFormatted} ${assetLabel}` : "--"]]} mono /></div>
+          <div className={`${metricClass} p-8`}><div className="absolute left-0 top-0 h-2 w-2 border-l border-t border-gray-700" /><h3 className="mb-6 text-[11px] font-extrabold uppercase tracking-widest text-gray-600">Vault Addresses</h3><MetaGrid rows={[["Vault", vault || "--"], ["Admin", parsedVault?.admin ?? "--"], ["Manager", parsedVault?.manager ?? "--"], ["Wallet", walletAddress ? shortAddress(walletAddress) : "--"], ["Treasury 1", "CJARK6AEdWdcuufq3bm7WDYKnj2XiiZ9uuJDY6BFWCfy"], ["Treasury 2", "0x500DABdd4ABC6F0F6B8211334873f3Ec7C3992F9"], ["Pending Claim", parsedPending?.success && parsedPending.amountRaw > 0 ? `${parsedPending.amountFormatted} ${assetLabel}` : "--"]]} mono /></div>
         </div>
       </div>
     </motion.div>
