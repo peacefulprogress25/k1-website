@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { motion, useScroll, AnimatePresence } from "motion/react";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Zap, Twitter, BookOpen, Sun, Wind, Atom, Droplet, Fuel, Grid3X3, User, Brain, Bot, Users, ShoppingBag, TrendingUp, ShieldCheck, Landmark, Building2, Send, Globe, BarChart3, Cpu, Battery } from "lucide-react";
+import { Zap, BookOpen, Sun, Wind, Atom, Droplet, Fuel, Grid3X3, User, Brain, Bot, Users, ShoppingBag, TrendingUp, ShieldCheck, Landmark, Building2, Send, Globe, BarChart3, Cpu, Battery } from "lucide-react";
 import { 
   AreaChart, 
   Area, 
@@ -463,10 +463,22 @@ function Footer() {
   return (
     <footer className="fixed bottom-0 left-0 w-full p-8 flex justify-center items-center z-50">
       <div className="flex items-center gap-10">
-        <a href="#" className="text-gray-600 hover:text-white transition-colors">
-          <Twitter className="w-5 h-5" />
+        <a
+          href="https://x.com/k1money__"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="K1 on X"
+          className="text-gray-600 hover:text-white transition-colors"
+        >
+          <span className="block font-mono text-sm font-bold leading-none">X</span>
         </a>
-        <a href="#" className="text-gray-600 hover:text-white transition-colors">
+        <a
+          href="https://solarpunkdao.gitbook.io/k1"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="K1 GitBook"
+          className="text-gray-600 hover:text-white transition-colors"
+        >
           <BookOpen className="w-5 h-5" />
         </a>
       </div>
