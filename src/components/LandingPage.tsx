@@ -72,43 +72,35 @@ const SECTIONS = [
 const FAQ_DATA = [
   {
     question: "What is K1?",
-    answer: "K1 is a decentralized financial layer that mobilizes capital into energy infrastructure, creating a yield-bearing asset backed by productive energy."
+    answer: "K1 is money backed by energy. It translates physical power generation into a highly composable, yield-bearing on-chain asset, powering the new economy for both humans and autonomous agents."
   },
   {
     question: "How do I earn with K1?",
-    answer: "Simply by holding K1 in your wallet. The balance auto-compounds as the underlying energy assets generate yield. No staking or locking required."
+    answer: "Simply hold it. K1 auto-compounds yield directly in your wallet with zero extra steps or friction."
   },
   {
-    question: "Is K1 a stablecoin?",
-    answer: "K1 is designed to be a stable store of value backed by energy. Unlike fiat-pegged stablecoins that lose value to inflation, K1 is focused on increasing your purchasing power relative to energy."
+    question: "How do you handle redemptions?",
+    answer: "K1 maintains an 80% treasury buffer in highly liquid, yield-bearing assets. While the remaining 20% is deployed into hard energy infrastructure to drive long-term value, this massive liquid majority ensures instant or near-instant (1 to 3 day) redemptions under any market condition."
+  },
+  {
+    question: "Is K1 composable in DeFi?",
+    answer: "Yes. K1 is engineered to be a foundational money lego. It acts as pristine, yield-bearing collateral for lending markets and a fluid medium of exchange across the broader decentralized finance ecosystem."
+  },
+  {
+    question: "What are the main risks?",
+    answer: "All DeFi protocols carry inherent risks, including smart contract vulnerabilities, liquidity constraints, and counterparty/bad debt risks. K1 actively mitigates these through strict collateralization parameters, heavy auditing, and a treasury mandate that prioritizes principal protection above all else."
   },
   {
     question: "Where does the yield come from?",
-    answer: "Yield is generated from the real-world productivity of energy infrastructure assets—solar farms, wind turbines, and battery storage systems that K1 capitalizes."
+    answer: "Yield is 100% organic. K1 generates returns from a diversified institutional portfolio - combining the cash flows of hard energy infrastructure with premium liquid strategies (T-Bills, Delta-Neutral positioning, Staking, and Reinsurance). There are zero algorithmic subsidies and zero inflationary token emissions."
   },
   {
-    question: "Do I have to lock my funds?",
-    answer: "No. K1 is highly liquid. You can swap or redeem your K1 at any time without lock-up periods or penalties."
-  },
-  {
-    question: "How is K1 collateralized?",
-    answer: "K1 is over-collateralized by a basket of energy-producing assets and high-quality liquid reserves, ensuring stability and trust."
-  },
-  {
-    question: "Who can use K1?",
-    answer: "Anyone with a web3 wallet. It's designed for humans, AI agents, and autonomous robots alike to participate in the abundance economy."
-  },
-  {
-    question: "What is the Abundance Economy?",
-    answer: "An economic model where energy is abundant and cheap, enabling a new era of human and machine productivity and collective prosperity."
+    question: "Is K1 a stablecoin?",
+    answer: "It is not hard pegged to $1 like fiat-pegged tokens (USDC or USDT) that constantly lose purchasing power to inflation, K1 is a yield-bearing asset designed to continuously grow in value. As the underlying treasury generates yield, the price of K1 steadily appreciates against the dollar."
   },
   {
     question: "Is K1 audited?",
-    answer: "Yes, our smart contracts and asset reserves undergo regular third-party audits to ensure maximum security and transparency."
-  },
-  {
-    question: "How do I get started?",
-    answer: "You can mint K1 directly through our portal using USDC or other supported assets. Your yield begins accruing immediately."
+    answer: "Yes. K1 is built on Ranger's Voltr architecture, which has undergone rigorous, extensive third-party security audits to ensure maximum protocol safety."
   }
 ];
 
