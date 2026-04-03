@@ -1,14 +1,14 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { motion, useScroll, AnimatePresence } from "motion/react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Zap, Twitter, BookOpen, Sun, Wind, Atom, Droplet, Fuel, Grid3X3, User, Brain, Bot, Users, ShoppingBag, TrendingUp, ShieldCheck, Landmark, Building2, Send, Globe, BarChart3, Cpu, Battery } from "lucide-react";
 import { 
   AreaChart, 
   Area, 
   ResponsiveContainer 
 } from "recharts";
-import MintPage from "@/components/MintPage";
 import { K1Logo } from "@/components/K1Logo";
 import { fetchVaultsTvl } from "@/lib/ranger-api";
 import { parseTvlResponse, parseVaultResponse } from "@/lib/vault-parse";
@@ -153,13 +153,17 @@ function FAQAccordion({ items }: { items: typeof FAQ_DATA }) {
 }
 
 export default function App() {
+  const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
+  const activeSectionRef = useRef(0);
+  const snapTimeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
+  const isAutoSnappingRef = useRef(false);
+  const wheelLockRef = useRef(false);
   const { scrollYProgress } = useScroll({
     target: containerRef,
   });
 
   const [activeSection, setActiveSection] = useState(0);
-  const [showMintPage, setShowMintPage] = useState(false);
   const [globalTvl, setGlobalTvl] = useState<unknown | null>(null);
   const [holderCount, setHolderCount] = useState<number | null>(null);
   const [vaultInfo, setVaultInfo] = useState<unknown | null>(null);
@@ -204,6 +208,28 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    activeSectionRef.current = activeSection;
+  }, [activeSection]);
+
+  const scrollToSection = useCallback((index: number) => {
+    if (typeof window === "undefined") return;
+
+    const clampedIndex = Math.max(0, Math.min(index, SECTIONS.length - 1));
+    const containerTop = containerRef.current?.offsetTop ?? 0;
+    const targetTop = containerTop + clampedIndex * window.innerHeight;
+
+    if (Math.abs(window.scrollY - targetTop) < 4) return;
+
+    isAutoSnappingRef.current = true;
+    window.scrollTo({ top: targetTop, behavior: "smooth" });
+
+    window.clearTimeout(snapTimeoutRef.current ?? undefined);
+    snapTimeoutRef.current = window.setTimeout(() => {
+      isAutoSnappingRef.current = false;
+    }, 650);
+  }, []);
+
+  useEffect(() => {
     const unsubscribe = scrollYProgress.on("change", (latest) => {
       const section = Math.min(
         Math.floor(latest * SECTIONS.length),
@@ -214,6 +240,64 @@ export default function App() {
     return () => unsubscribe();
   }, [scrollYProgress]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const clearSnapTimeout = () => {
+      if (snapTimeoutRef.current != null) {
+        window.clearTimeout(snapTimeoutRef.current);
+        snapTimeoutRef.current = null;
+      }
+    };
+
+    const scheduleSnapToNearest = () => {
+      clearSnapTimeout();
+
+      snapTimeoutRef.current = window.setTimeout(() => {
+        if (isAutoSnappingRef.current) return;
+
+        const containerTop = containerRef.current?.offsetTop ?? 0;
+        const relativeScroll = window.scrollY - containerTop;
+        const maxScroll = (SECTIONS.length - 1) * window.innerHeight;
+        const clampedScroll = Math.max(0, Math.min(relativeScroll, maxScroll));
+        const nearestSection = Math.round(clampedScroll / window.innerHeight);
+
+        scrollToSection(nearestSection);
+      }, 140);
+    };
+
+    const handleScroll = () => {
+      if (!isAutoSnappingRef.current) {
+        scheduleSnapToNearest();
+      }
+    };
+
+    const handleWheel = (event: WheelEvent) => {
+      if (Math.abs(event.deltaY) < 10 || isAutoSnappingRef.current || wheelLockRef.current) {
+        return;
+      }
+
+      event.preventDefault();
+      wheelLockRef.current = true;
+
+      const direction = event.deltaY > 0 ? 1 : -1;
+      scrollToSection(activeSectionRef.current + direction);
+
+      window.setTimeout(() => {
+        wheelLockRef.current = false;
+      }, 700);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("wheel", handleWheel, { passive: false });
+
+    return () => {
+      clearSnapTimeout();
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("wheel", handleWheel);
+    };
+  }, [scrollToSection]);
+
   return (
     <div ref={containerRef} className="landing-page relative h-[600vh] bg-[#050505] text-white">
       {/* Fixed Background Grid */}
@@ -221,13 +305,7 @@ export default function App() {
       <div className="fixed inset-0 vertical-divider pointer-events-none" />
 
       {/* Fixed UI Frame */}
-      <Header onMintClick={() => setShowMintPage(true)} />
-      
-      <AnimatePresence>
-        {showMintPage && (
-          <MintPage onClose={() => setShowMintPage(false)} />
-        )}
-      </AnimatePresence>
+      <Header onMintClick={() => router.push("/mint")} />
 
       <Footer />
       <Sidebar activeIndex={activeSection} />
