@@ -91,12 +91,20 @@ const FAQ_DATA = [
     answer: "All DeFi protocols carry inherent risks, including smart contract vulnerabilities, liquidity constraints, and counterparty/bad debt risks. K1 actively mitigates these through strict collateralization parameters, heavy auditing, and a treasury mandate that prioritizes principal protection above all else."
   },
   {
+    question: "What is the energy supercycle?",
+    answer: "Driven by AI, robotics, EVs, and the net-zero transition, global energy is now a $3.5 trillion annual investment opportunity. Currently, 75% of this market is gatekept by private institutional capital. K1 decentralizes this access, allowing anyone to fund and profit from the greatest physical infrastructure buildout of our generation."
+  },
+  {
     question: "Where does the yield come from?",
     answer: "Yield is 100% organic. K1 generates returns from a diversified institutional portfolio - combining the cash flows of hard energy infrastructure with premium liquid strategies (T-Bills, Delta-Neutral positioning, Staking, and Reinsurance). There are zero algorithmic subsidies and zero inflationary token emissions."
   },
   {
     question: "Is K1 a stablecoin?",
     answer: "It is not hard pegged to $1 like fiat-pegged tokens (USDC or USDT) that constantly lose purchasing power to inflation, K1 is a yield-bearing asset designed to continuously grow in value. As the underlying treasury generates yield, the price of K1 steadily appreciates against the dollar."
+  },
+  {
+    question: "Why back a currency with energy?",
+    answer: "Energy is the root asset of the modern economy; every good and service requires power to exist. In a future where AI and robotics make intelligence and labor abundant, physical energy will be the only truly scarce resource. By backing K1 with hard infrastructure, we create a currency that cannot be inflated without directly adding tangible value to society."
   },
   {
     question: "Is K1 audited?",
