@@ -470,7 +470,12 @@ function Footer() {
           aria-label="K1 on X"
           className="text-gray-600 hover:text-white transition-colors"
         >
-          <span className="block font-mono text-sm font-bold leading-none">X</span>
+          <img
+            src="/x-icon.svg"
+            alt=""
+            aria-hidden="true"
+            className="h-5 w-5 opacity-80 transition-opacity hover:opacity-100"
+          />
         </a>
         <a
           href="https://solarpunkdao.gitbook.io/k1"
