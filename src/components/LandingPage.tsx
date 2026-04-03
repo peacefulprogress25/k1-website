@@ -156,7 +156,7 @@ export default function App() {
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
   const activeSectionRef = useRef(0);
-  const snapTimeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
+  const snapTimeoutRef = useRef<number | null>(null);
   const isAutoSnappingRef = useRef(false);
   const wheelLockRef = useRef(false);
   const { scrollYProgress } = useScroll({
