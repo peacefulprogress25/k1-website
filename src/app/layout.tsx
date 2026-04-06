@@ -3,8 +3,8 @@ import "./globals.css";
 import { WalletProvider } from "@/components/WalletProvider";
 
 export const metadata: Metadata = {
-  title: "K1 - Money backed by energy",
-  description: "K1 - Money backed by energy",
+  title: "K1 - High yield from hard money that creates energy",
+  description: "K1 - High yield from hard money that creates energy",
 };
 
 export default function RootLayout({
