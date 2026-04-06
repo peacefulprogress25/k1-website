@@ -71,6 +71,41 @@ const SECTIONS = [
 
 const FAQ_DATA = [
   {
+    question: "Is K1 audited?",
+    answer: (
+      <>
+        Yes. K1 is built on Ranger&apos;s Voltr architecture, which has undergone rigorous auditing. You can check{" "}
+        <a
+          href="chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://lh0wrlblwpfflwdq.public.blob.vercel-storage.com/Certora%20Audit%20-%20Ranger%20Finance%20-%20Voltr%20Vault%20-%20Final%20Report.pdf"
+          target="_blank"
+          rel="noreferrer"
+          className="italic underline underline-offset-2 transition-colors hover:text-white"
+        >
+          Certora
+        </a>
+        ,{" "}
+        <a
+          href="chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://lh0wrlblwpfflwdq.public.blob.vercel-storage.com/vault-report-00-yRcZMT50sNKSd9tQncthQBrwijf4an.pdf"
+          target="_blank"
+          rel="noreferrer"
+          className="italic underline underline-offset-2 transition-colors hover:text-white"
+        >
+          Sec 3 X-Ray
+        </a>{" "}
+        and{" "}
+        <a
+          href="https://github.com/fyeo-io/public-audit-reports/blob/main/Code%20Audit%20Reports/2025/Voltr/Voltr%20-%20Security%20Code%20Review%20of%20Voltr%20Vault%20v1.0.pdf"
+          target="_blank"
+          rel="noreferrer"
+          className="italic underline underline-offset-2 transition-colors hover:text-white"
+        >
+          FYEO
+        </a>
+        .
+      </>
+    )
+  },
+  {
     question: "What is K1?",
     answer: "K1 is money backed by energy. It translates physical power generation into a highly composable, yield-bearing on-chain asset, powering the new economy for both humans and autonomous agents."
   },
@@ -105,10 +140,6 @@ const FAQ_DATA = [
   {
     question: "Why back a currency with energy?",
     answer: "Energy is the root asset of the modern economy; every good and service requires power to exist. In a future where AI and robotics make intelligence and labor abundant, physical energy will be the only truly scarce resource. By backing K1 with hard infrastructure, we create a currency that cannot be inflated without directly adding tangible value to society."
-  },
-  {
-    question: "Is K1 audited?",
-    answer: "Yes. K1 is built on Ranger's Voltr architecture, which has undergone rigorous, extensive third-party security audits to ensure maximum protocol safety."
   }
 ];
 
@@ -140,9 +171,9 @@ function FAQAccordion({ items }: { items: typeof FAQ_DATA }) {
                 transition={{ duration: 0.3, ease: "easeInOut" }}
                 className="overflow-hidden"
               >
-                <p className="pb-4 text-gray-500 text-sm leading-relaxed max-w-xl">
+                <div className="pb-4 text-gray-500 text-sm leading-relaxed max-w-xl">
                   {item.answer}
-                </p>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
