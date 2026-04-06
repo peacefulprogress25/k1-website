@@ -76,7 +76,7 @@ const FAQ_DATA = [
       <>
         Yes. K1 is built on Ranger&apos;s Voltr architecture, which has undergone rigorous auditing. You can check{" "}
         <a
-          href="chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://lh0wrlblwpfflwdq.public.blob.vercel-storage.com/Certora%20Audit%20-%20Ranger%20Finance%20-%20Voltr%20Vault%20-%20Final%20Report.pdf"
+          href="/audits/certora-audit-report.pdf"
           target="_blank"
           rel="noreferrer"
           className="italic underline underline-offset-2 transition-colors hover:text-white"
@@ -85,7 +85,7 @@ const FAQ_DATA = [
         </a>
         ,{" "}
         <a
-          href="chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://lh0wrlblwpfflwdq.public.blob.vercel-storage.com/vault-report-00-yRcZMT50sNKSd9tQncthQBrwijf4an.pdf"
+          href="/audits/sec-3-audit-report.pdf"
           target="_blank"
           rel="noreferrer"
           className="italic underline underline-offset-2 transition-colors hover:text-white"
