@@ -198,6 +198,7 @@ export default function App() {
   const [globalTvl, setGlobalTvl] = useState<unknown | null>(null);
   const [holderCount, setHolderCount] = useState<number | null>(null);
   const [vaultInfo, setVaultInfo] = useState<unknown | null>(null);
+  const [isDesktop, setIsDesktop] = useState(false);
 
   const parsedTvl = parseTvlResponse(globalTvl);
   const parsedVault = parseVaultResponse(vaultInfo);
@@ -242,6 +243,25 @@ export default function App() {
     activeSectionRef.current = activeSection;
   }, [activeSection]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const mediaQuery = window.matchMedia("(min-width: 768px)");
+    const syncViewport = (event?: MediaQueryListEvent) => {
+      setIsDesktop(event ? event.matches : mediaQuery.matches);
+    };
+
+    syncViewport();
+
+    if (typeof mediaQuery.addEventListener === "function") {
+      mediaQuery.addEventListener("change", syncViewport);
+      return () => mediaQuery.removeEventListener("change", syncViewport);
+    }
+
+    mediaQuery.addListener(syncViewport);
+    return () => mediaQuery.removeListener(syncViewport);
+  }, []);
+
   const scrollToSection = useCallback((index: number) => {
     if (typeof window === "undefined") return;
 
@@ -261,6 +281,8 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    if (!isDesktop) return;
+
     const unsubscribe = scrollYProgress.on("change", (latest) => {
       const section = Math.min(
         Math.floor(latest * SECTIONS.length),
@@ -269,10 +291,10 @@ export default function App() {
       setActiveSection(section);
     });
     return () => unsubscribe();
-  }, [scrollYProgress]);
+  }, [isDesktop, scrollYProgress]);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || !isDesktop) return;
 
     const clearSnapTimeout = () => {
       if (snapTimeoutRef.current != null) {
@@ -327,145 +349,306 @@ export default function App() {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("wheel", handleWheel);
     };
-  }, [scrollToSection]);
+  }, [isDesktop, scrollToSection]);
 
   return (
-    <div ref={containerRef} className="landing-page relative h-[600vh] bg-[#050505] text-white">
-      {/* Fixed Background Grid */}
-      <div className="fixed inset-0 grid-bg pointer-events-none opacity-40" />
-      <div className="fixed inset-0 vertical-divider pointer-events-none" />
+    <>
+      <div className="md:hidden bg-[#050505] text-white">
+        <MobileLandingPage
+          heroStats={heroStats}
+          onMintClick={() => router.push("/mint")}
+          parsedVaultValue={parsedVault?.assetTotalValue}
+        />
+      </div>
 
-      {/* Fixed UI Frame */}
-      <Header onMintClick={() => router.push("/mint")} />
+      <div ref={containerRef} className="landing-page relative hidden h-[600vh] bg-[#050505] text-white md:block">
+        {/* Fixed Background Grid */}
+        <div className="fixed inset-0 grid-bg pointer-events-none opacity-40" />
+        <div className="fixed inset-0 vertical-divider pointer-events-none" />
 
-      <Footer />
-      <Sidebar activeIndex={activeSection} />
+        {/* Fixed UI Frame */}
+        <Header onMintClick={() => router.push("/mint")} />
 
-      {/* Content Layer */}
-      <div className="fixed inset-0 flex items-center px-8 pt-6 md:px-14 lg:px-20 xl:px-24 pointer-events-none">
-        {activeSection === 5 ? (
-          <div className="mx-auto flex h-full w-full max-w-7xl flex-col items-center justify-start pt-16 md:pt-20">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeSection}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="flex w-full flex-1 flex-col items-center"
-              >
-                <h1 className="mb-10 text-center font-serif text-3xl leading-[1.1] tracking-tight text-brand-orange md:text-[50px]">
-                  FAQs
-                </h1>
-                <div className="grid w-full grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-14 xl:gap-16">
-                  <div className="w-full self-start">
-                    <FAQAccordion items={FAQ_DATA.slice(0, 5)} />
-                  </div>
-                  <div className="w-full self-start">
-                    <FAQAccordion items={FAQ_DATA.slice(5)} />
-                  </div>
-                </div>
-              </motion.div>
-            </AnimatePresence>
-          </div>
-        ) : (
-          <div className="mx-auto grid h-full w-full max-w-7xl grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-14 xl:gap-16">
-            
-            {/* Left Column: Text Content */}
-            <div className="z-10 flex h-full w-full items-center">
-              <div className="w-full max-w-[460px]">
-              <div className="flex h-[120px] flex-col justify-end pb-2 transition-all duration-500 md:h-[170px]">
-                <h1 className="mb-0 font-serif text-3xl leading-[1.1] tracking-tight text-white transition-all duration-500 md:text-[50px]">
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={activeSection}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.4, ease: "easeOut" }}
-                    >
-                      <span className="text-white block">{SECTIONS[activeSection].prefix}</span>
-                      <span className="italic font-normal text-brand-orange block">
-                        {SECTIONS[activeSection].suffix}
-                      </span>
-                    </motion.div>
-                  </AnimatePresence>
-                </h1>
-              </div>
-              
-              <div className="mt-4">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={activeSection}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.5, delay: 0.2 }}
-                  >
-                    {SECTIONS[activeSection].subheading && (
-                      <motion.h2
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, delay: 0.1 }}
-                        className="mb-6 font-serif text-xl leading-snug text-gray-400 md:text-xl"
-                      >
-                        {SECTIONS[activeSection].subheading}
-                      </motion.h2>
-                    )}
+        <Footer />
+        <Sidebar activeIndex={activeSection} />
 
-                    <>
-                      <p className="max-w-[384px] font-sans text-sm leading-relaxed text-gray-500 md:text-sm">
-                        {SECTIONS[activeSection].description}
-                      </p>
-                      
-                      {activeSection === 0 && (
-                        <div className="mt-8 flex gap-8">
-                          {(heroStats.map((stat) =>
-                            stat.label === "TVL" && stat.value === "--" && parsedVault?.assetTotalValue
-                              ? { ...stat, value: `$${parsedVault.assetTotalValue}` }
-                              : stat
-                          )).map((stat, i) => (
-                            <div key={i} className="flex flex-col">
-                              <span className="text-[9px] font-mono text-gray-600 tracking-widest uppercase">
-                                {stat.label}
-                              </span>
-                              <span className="text-white font-serif text-xl mt-1">
-                                {stat.value}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </>
-                  </motion.div>
-                </AnimatePresence>
-              </div>
-              </div>
-            </div>
-
-            {/* Right Column: Dynamic Graphics */}
-            <div className="relative flex h-full w-full items-center justify-center transition-all duration-500">
+        {/* Content Layer */}
+        <div className="fixed inset-0 flex items-center px-8 pt-6 md:px-14 lg:px-20 xl:px-24 pointer-events-none">
+          {activeSection === 5 ? (
+            <div className="mx-auto flex h-full w-full max-w-7xl flex-col items-center justify-start pt-16 md:pt-20">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeSection}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 1.1 }}
-                  transition={{ duration: 0.7, ease: "circOut" }}
-                  className="flex h-full w-full items-center justify-center"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  className="flex w-full flex-1 flex-col items-center"
                 >
-                  <GraphicRenderer type={SECTIONS[activeSection].graphic} />
+                  <h1 className="mb-10 text-center font-serif text-3xl leading-[1.1] tracking-tight text-brand-orange md:text-[50px]">
+                    FAQs
+                  </h1>
+                  <div className="grid w-full grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-14 xl:gap-16">
+                    <div className="w-full self-start">
+                      <FAQAccordion items={FAQ_DATA.slice(0, 5)} />
+                    </div>
+                    <div className="w-full self-start">
+                      <FAQAccordion items={FAQ_DATA.slice(5)} />
+                    </div>
+                  </div>
                 </motion.div>
               </AnimatePresence>
             </div>
-          </div>
-        )}
-      </div>
+          ) : (
+            <div className="mx-auto grid h-full w-full max-w-7xl grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-14 xl:gap-16">
+              
+              {/* Left Column: Text Content */}
+              <div className="z-10 flex h-full w-full items-center">
+                <div className="w-full max-w-[460px]">
+                <div className="flex h-[120px] flex-col justify-end pb-2 transition-all duration-500 md:h-[170px]">
+                  <h1 className="mb-0 font-serif text-3xl leading-[1.1] tracking-tight text-white transition-all duration-500 md:text-[50px]">
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={activeSection}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.4, ease: "easeOut" }}
+                      >
+                        <span className="text-white block">{SECTIONS[activeSection].prefix}</span>
+                        <span className="italic font-normal text-brand-orange block">
+                          {SECTIONS[activeSection].suffix}
+                        </span>
+                      </motion.div>
+                    </AnimatePresence>
+                  </h1>
+                </div>
+                
+                <div className="mt-4">
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={activeSection}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.5, delay: 0.2 }}
+                    >
+                      {SECTIONS[activeSection].subheading && (
+                        <motion.h2
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.5, delay: 0.1 }}
+                          className="mb-6 font-serif text-xl leading-snug text-gray-400 md:text-xl"
+                        >
+                          {SECTIONS[activeSection].subheading}
+                        </motion.h2>
+                      )}
 
-      {/* Scrollable Spacers */}
-      {SECTIONS.map((_, i) => (
-        <div key={i} className="h-screen" />
-      ))}
+                      <>
+                        <p className="max-w-[384px] font-sans text-sm leading-relaxed text-gray-500 md:text-sm">
+                          {SECTIONS[activeSection].description}
+                        </p>
+                        
+                        {activeSection === 0 && (
+                          <div className="mt-8 flex gap-8">
+                            {(heroStats.map((stat) =>
+                              stat.label === "TVL" && stat.value === "--" && parsedVault?.assetTotalValue
+                                ? { ...stat, value: `$${parsedVault.assetTotalValue}` }
+                                : stat
+                            )).map((stat, i) => (
+                              <div key={i} className="flex flex-col">
+                                <span className="text-[9px] font-mono text-gray-600 tracking-widest uppercase">
+                                  {stat.label}
+                                </span>
+                                <span className="text-white font-serif text-xl mt-1">
+                                  {stat.value}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </>
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
+                </div>
+              </div>
+
+              {/* Right Column: Dynamic Graphics */}
+              <div className="relative flex h-full w-full items-center justify-center transition-all duration-500">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={activeSection}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 1.1 }}
+                    transition={{ duration: 0.7, ease: "circOut" }}
+                    className="flex h-full w-full items-center justify-center"
+                  >
+                    <GraphicRenderer type={SECTIONS[activeSection].graphic} />
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Scrollable Spacers */}
+        {SECTIONS.map((_, i) => (
+          <div key={i} className="h-screen" />
+        ))}
+      </div>
+    </>
+  );
+}
+
+function MobileLandingPage({
+  heroStats,
+  onMintClick,
+  parsedVaultValue,
+}: {
+  heroStats: Array<{ label: string; value: string }>;
+  onMintClick: () => void;
+  parsedVaultValue?: string;
+}) {
+  const displayHeroStats = heroStats.map((stat) =>
+    stat.label === "TVL" && stat.value === "--" && parsedVaultValue
+      ? { ...stat, value: `$${parsedVaultValue}` }
+      : stat
+  );
+
+  return (
+    <div className="relative overflow-hidden">
+      <div className="absolute inset-0 grid-bg pointer-events-none opacity-30" />
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top,#fe550014,transparent_45%)]" />
+
+      <div className="relative mx-auto flex min-h-screen w-full max-w-md flex-col px-5 pb-12 pt-5">
+        <div className="sticky top-0 z-30 -mx-5 mb-8 border-b border-white/10 bg-[#050505]/90 px-5 py-4 backdrop-blur">
+          <div className="flex items-center justify-between gap-4">
+            <div className="h-10 w-auto aspect-[1024/672]">
+              <K1Logo className="h-full w-full text-brand-orange" />
+            </div>
+            <button
+              onClick={onMintClick}
+              className="bg-brand-orange px-4 py-2 font-mono text-[10px] font-bold tracking-[0.12em] text-black transition-colors hover:bg-white"
+            >
+              MINT K1
+            </button>
+          </div>
+        </div>
+
+        <div className="space-y-14">
+          {SECTIONS.filter((section) => section.graphic !== "faq").map((section, index) => (
+            <motion.section
+              key={section.id}
+              initial={{ opacity: 0, y: 28 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.25 }}
+              transition={{ duration: 0.55, ease: "easeOut", delay: index * 0.03 }}
+              className="space-y-6"
+            >
+              <div className="space-y-4">
+                <div className="space-y-1">
+                  {section.prefix ? (
+                    <p className="font-serif text-4xl leading-none tracking-tight text-white">
+                      {section.prefix}
+                    </p>
+                  ) : null}
+                  <p className="font-serif text-4xl leading-none tracking-tight text-brand-orange italic">
+                    {section.suffix}
+                  </p>
+                </div>
+                {section.subheading ? (
+                  <h2 className="max-w-sm font-serif text-lg leading-snug text-gray-300">
+                    {section.subheading}
+                  </h2>
+                ) : null}
+                {section.description ? (
+                  <p className="max-w-sm font-sans text-sm leading-7 text-gray-400">
+                    {section.description}
+                  </p>
+                ) : null}
+              </div>
+
+              {section.id === 0 ? (
+                <div className="grid grid-cols-3 gap-3 border border-white/10 bg-white/[0.02] p-4">
+                  {displayHeroStats.map((stat) => (
+                    <div key={stat.label} className="space-y-1">
+                      <p className="font-mono text-[9px] uppercase tracking-[0.22em] text-gray-500">
+                        {stat.label}
+                      </p>
+                      <p className="font-serif text-lg text-white">{stat.value}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+
+              <MobileGraphicFrame type={section.graphic} />
+            </motion.section>
+          ))}
+
+          <motion.section
+            initial={{ opacity: 0, y: 28 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.55, ease: "easeOut" }}
+            className="space-y-6"
+          >
+            <div className="space-y-3">
+              <p className="font-serif text-4xl leading-none tracking-tight text-brand-orange italic">
+                FAQs
+              </p>
+              <p className="max-w-sm font-sans text-sm leading-7 text-gray-400">
+                The most common questions about K1, its structure, and how the vault works.
+              </p>
+            </div>
+
+            <div className="space-y-8">
+              <FAQAccordion items={FAQ_DATA.slice(0, 5)} />
+              <FAQAccordion items={FAQ_DATA.slice(5)} />
+            </div>
+          </motion.section>
+        </div>
+
+        <div className="mt-12 flex items-center justify-center gap-8 border-t border-white/10 pt-6">
+          <a
+            href="https://x.com/k1money__"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="K1 on X"
+            className="flex h-11 w-11 items-center justify-center text-gray-500 transition-colors hover:text-white"
+          >
+            <img
+              src="/x-icon.svg"
+              alt=""
+              aria-hidden="true"
+              className="h-5 w-5 opacity-80 transition-opacity hover:opacity-100"
+            />
+          </a>
+          <a
+            href="https://solarpunkdao.gitbook.io/k1"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="K1 GitBook"
+            className="flex h-11 w-11 items-center justify-center text-gray-500 transition-colors hover:text-white"
+          >
+            <BookOpen className="h-5 w-5" />
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MobileGraphicFrame({ type }: { type: string }) {
+  const scaleClass = type === "abundance" ? "scale-[0.58]" : type === "geometric" ? "scale-[0.7]" : "scale-90";
+  const alignmentClass = type === "sphere" ? "" : type === "chart" ? "" : "translate-y-1";
+
+  return (
+    <div className="relative flex min-h-[240px] items-center justify-center overflow-hidden border border-white/10 bg-white/[0.02] px-2 py-4">
+      <div className={`flex h-full w-full items-center justify-center transform-gpu ${scaleClass} ${alignmentClass}`}>
+        <GraphicRenderer type={type} />
+      </div>
     </div>
   );
 }
