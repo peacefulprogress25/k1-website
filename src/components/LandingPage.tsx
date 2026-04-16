@@ -74,7 +74,7 @@ const FAQ_DATA = [
     question: "Is K1 audited?",
     answer: (
       <>
-        Yes. K1 is built on Ranger&apos;s Voltr architecture, which has undergone rigorous auditing. You can check{" "}
+        Yes. K1 is built on Voltr architecture which is battle tested and undergone extensive audits. You can check{" "}
         <a
           href="/audits/certora-audit-report.pdf"
           target="_blank"
