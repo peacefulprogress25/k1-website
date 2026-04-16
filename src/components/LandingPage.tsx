@@ -24,7 +24,7 @@ const SECTIONS = [
     prefix: "Money that",
     suffix: "creates energy.",
     subheading: "Energy that creates yield",
-    description: "K1 is a stablecoin that mobilizes global capital into energy infra. Making energy collateral for a new reserve currency.",
+    description: "K1 is a stablecoin that mobilizes global capital into energy infrastructure, transforming energy into collateral for a new reserve currency.",
     graphic: "sphere",
   },
   {
